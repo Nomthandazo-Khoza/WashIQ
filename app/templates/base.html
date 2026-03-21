@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}WashIQ{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}WashIQ offers trusted car wash and secure parking services in Durban with quick online booking.{% endblock %}">
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="logo" href="/">WashIQ</a>
+      <div class="nav-right">
+        <nav class="menu">
+          {# Hide Home for logged-in customers; they should only return to home via Logout. #}
+          {% if not current_customer or current_customer.is_admin %}
+            <a href="/">Home</a>
+          {% endif %}
+          {% if not current_customer %}
+            <a href="/login?next=/booking">Booking</a>
+          {% elif not current_customer.is_admin %}
+            <a href="/booking">Booking</a>
+          {% endif %}
+          {% if not current_customer or current_customer.is_admin %}
+            <a href="/contact">Contact</a>
+          {% endif %}
+          {% if current_customer %}
+            {% if current_customer.is_admin %}
+              <a href="/dashboard">Dashboard</a>
+            {% endif %}
+            {% if not current_customer.is_admin %}
+              <a href="/profile">Profile</a>
+            {% endif %}
+          {% endif %}
+        </nav>
+        {% if current_customer %}
+          <form method="post" action="/logout" class="logout-form">
+            <button class="btn nav-cta" type="submit">Logout</button>
+          </form>
+        {% else %}
+          <div class="nav-auth">
+            <a class="nav-login-link" href="/login">Login</a>
+            <a class="btn nav-cta" href="/login?next=/booking">Book a wash</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <p>© {{ 2026 }} WashIQ. Car Wash and Secure Parking.</p>
+      <a href="/contact">Get in touch</a>
+    </div>
+  </footer>
+</body>
+</html>

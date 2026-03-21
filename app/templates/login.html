@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Login | WashIQ{% endblock %}
+{% block meta_description %}Log in to your WashIQ account to access your profile and personal booking history.{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+  <article class="card auth-card">
+    <p class="eyebrow">Welcome Back</p>
+    <h1>Log in to your account</h1>
+    {% if next_path == "/booking" %}
+      <p class="muted">Log in to continue your booking.</p>
+    {% else %}
+      <p class="muted">Access your profile and view your booking history.</p>
+    {% endif %}
+
+    {% if error_message %}
+      <div class="alert error">{{ error_message }}</div>
+    {% endif %}
+
+    <form method="post" action="/login" class="booking-form">
+      {% if next_path %}
+        <input type="hidden" name="next" value="{{ next_path }}">
+      {% endif %}
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" value="{{ form_data.email }}" required>
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required>
+
+      <button class="btn" type="submit">Log In</button>
+    </form>
+
+    <p class="auth-link muted">
+      New to WashIQ? <a href="/signup">Create an account</a>
+    </p>
+  </article>
+</section>
+{% endblock %}

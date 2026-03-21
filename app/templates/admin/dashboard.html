@@ -1,0 +1,71 @@
+{% extends "admin/layout.html" %}
+{% block title %}Admin Dashboard | WashIQ{% endblock %}
+{% block meta_description %}WashIQ admin dashboard with bookings, payments, revenue metrics, and actionable alerts.{% endblock %}
+
+{% block admin_main %}
+<header class="admin-main-header admin-main-header--hero">
+  <div>
+    <p class="eyebrow">Admin</p>
+    <h1>Operations Dashboard</h1>
+    <p class="muted">Monitor bookings, payment performance, and outstanding actions from one place.</p>
+  </div>
+
+  <div class="admin-main-user">
+    {% if current_customer %}
+      <div class="muted small-muted">
+        Signed in as <strong>{{ current_customer.full_name }}</strong>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/logout" class="logout-form">
+      <button class="btn btn-ghost btn-sm" type="submit">Logout</button>
+    </form>
+  </div>
+</header>
+
+<section class="dashboard-metrics">
+  <article class="card stat-card">
+    <span>Total Bookings</span>
+    <strong>{{ metrics.total_bookings }}</strong>
+  </article>
+  <article class="card stat-card">
+    <span>Paid Bookings</span>
+    <strong>{{ metrics.paid_bookings }}</strong>
+  </article>
+  <article class="card stat-card">
+    <span>Unpaid Bookings</span>
+    <strong>{{ metrics.unpaid_bookings }}</strong>
+  </article>
+  <article class="card stat-card">
+    <span>Total Revenue</span>
+    <strong>R{{ metrics.total_revenue_display }}</strong>
+  </article>
+</section>
+
+<section class="dashboard-layout">
+  <article class="card dashboard-table-card">
+    <h2>Recent Bookings</h2>
+    {% set bookings = recent_bookings %}
+    {% include "admin/bookings_table.html" %}
+  </article>
+
+  <article class="card dashboard-alerts-card">
+    <h2>Actionable Alerts</h2>
+    {% if alerts %}
+      <div class="alert-list">
+        {% for alert in alerts %}
+          <div class="alert-item">{{ alert }}</div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert-all-clear">All clear. No outstanding payment alerts right now.</div>
+    {% endif %}
+    <p class="dashboard-note muted">
+      Dev note: mark an admin directly in SQLite by setting <code>customers.is_admin = 1</code> for your account.
+    </p>
+    <p class="dashboard-note muted" style="margin-top: 0.5rem;">
+      <a class="action-link" href="/dashboard/bookings">View all bookings &rarr;</a>
+    </p>
+  </article>
+</section>
+{% endblock %}

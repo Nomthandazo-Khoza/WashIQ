@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{# Child templates extend this file and fill block admin_main. Context: admin_section string. #}
+
+{% block content %}
+<section class="admin-dashboard-shell">
+  <aside class="admin-sidebar card">
+    <div class="admin-sidebar-brand">
+      <p class="eyebrow">Admin</p>
+      <strong class="admin-sidebar-title">WashIQ Ops</strong>
+      <span class="admin-sidebar-subtitle muted">Operations overview</span>
+    </div>
+
+    <nav class="admin-side-nav" aria-label="Admin navigation">
+      <a class="admin-nav-item{% if admin_section == 'dashboard' %} active{% endif %}" href="/dashboard">
+        <span class="admin-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M3 13h8V3H3v10zm10 8h8V11h-8v10zM13 3v8h8V3h-8zM3 21h8v-6H3v6z"/>
+          </svg>
+        </span>
+        <span>Dashboard</span>
+      </a>
+
+      <a class="admin-nav-item{% if admin_section == 'bookings' %} active{% endif %}" href="/dashboard/bookings">
+        <span class="admin-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 7h5v2H7V7zm0 4h10v2H7v-2z"/>
+          </svg>
+        </span>
+        <span>Bookings</span>
+      </a>
+
+      <a class="admin-nav-item{% if admin_section == 'payments' %} active{% endif %}" href="/dashboard/payments">
+        <span class="admin-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M17 3H7c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 16H8v-2h4v2zm6-4H6V7h12v8z"/>
+          </svg>
+        </span>
+        <span>Payments</span>
+      </a>
+
+      <a class="admin-nav-item{% if admin_section == 'customers' %} active{% endif %}" href="/dashboard/customers">
+        <span class="admin-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 2.95V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+          </svg>
+        </span>
+        <span>Customers</span>
+      </a>
+
+      <a class="admin-nav-item{% if admin_section == 'vehicles' %} active{% endif %}" href="/dashboard/vehicles">
+        <span class="admin-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M17 6H7c-1.1 0-2 .9-2 2l-1 6v2h2v-2h10v2h2v-2l-1-6c0-1.1-.9-2-2-2zm-10 6 1-4h8l1 4H7zm5-2h2v2h-2v-2z"/>
+          </svg>
+        </span>
+        <span>Vehicles</span>
+      </a>
+
+      <a class="admin-nav-item{% if admin_section == 'reports' %} active{% endif %}" href="/dashboard/reports">
+        <span class="admin-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M3 3h18v2H3V3zm2 5h14v2H5V8zm2 5h10v2H7v-2zm2 5h6v2H9v-2z"/>
+          </svg>
+        </span>
+        <span>Reports</span>
+      </a>
+
+      <a class="admin-nav-item{% if admin_section == 'settings' %} active{% endif %}" href="/dashboard/settings">
+        <span class="admin-nav-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.11-.2-.36-.28-.56-.2l-2.39.96c-.5-.38-1.04-.69-1.63-.9L14.5 2.5c-.03-.22-.22-.38-.44-.38h-3.84c-.22 0-.41.16-.44.38l-.36 2.5c-.59.21-1.14.52-1.63.9l-2.39-.96c-.2-.08-.45 0-.56.2L1.9 8.26c-.11.2-.06.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.11.2.36.28.56.2l2.39-.96c.5.38 1.04.69 1.63.9l.36 2.5c.03.22.22.38.44.38h3.84c.22 0 .41-.16.44-.38l.36-2.5c.59-.21 1.14-.52 1.63-.9l2.39.96c.2.08.45 0 .56-.2l1.92-3.32c.11-.2.06-.47-.12-.61l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5z"/>
+          </svg>
+        </span>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+      <form method="post" action="/logout" class="admin-sidebar-logout">
+        <button class="btn btn-ghost btn-sm" type="submit">
+          Logout
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="admin-main">
+    {% block admin_main %}{% endblock %}
+  </div>
+</section>
+{% endblock %}

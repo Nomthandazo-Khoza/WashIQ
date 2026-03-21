@@ -1,0 +1,45 @@
+{% if bookings %}
+  <div class="dashboard-table-wrap">
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Vehicle</th>
+          <th>Service</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Amount</th>
+          <th>Payment</th>
+          <th>Actions</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+          <tr>
+            <td>{{ booking.customer_name }}</td>
+            <td>{{ booking.vehicle }}</td>
+            <td>{{ booking.service }}</td>
+            <td>{{ booking.booking_date }}</td>
+            <td>{{ booking.time_slot }}</td>
+            <td>R{{ booking.amount_display }}</td>
+            <td><span class="status-badge {{ booking.payment_status_key }}">{{ booking.payment_status }}</span></td>
+            <td>
+              <div class="dash-actions">
+                <a class="action-link" href="/payment?booking_id={{ booking.id }}">Payment</a>
+                {% if booking.payment_status_key != 'paid' %}
+                  <form method="post" action="/dashboard/booking/{{ booking.id }}/mark-paid" class="mark-paid-form">
+                    <button class="btn btn-sm" type="submit">Mark Paid</button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+            <td>{{ booking.status }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="muted">No bookings found yet.</p>
+{% endif %}

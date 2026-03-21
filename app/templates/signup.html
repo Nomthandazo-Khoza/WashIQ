@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Sign Up | WashIQ{% endblock %}
+{% block meta_description %}Create your WashIQ account to manage bookings and view your service history.{% endblock %}
+
+{% block content %}
+<section class="auth-wrap">
+  <article class="card auth-card">
+    <p class="eyebrow">Create Account</p>
+    <h1>Sign up for WashIQ</h1>
+    <p class="muted">Create your account to track bookings and enjoy a smoother experience.</p>
+
+    {% if error_message %}
+      <div class="alert error">{{ error_message }}</div>
+    {% endif %}
+
+    <form method="post" action="/signup" class="booking-form">
+      <label for="full_name">Full Name</label>
+      <input id="full_name" name="full_name" type="text" value="{{ form_data.full_name }}" required>
+
+      <label for="phone">Phone</label>
+      <input id="phone" name="phone" type="text" value="{{ form_data.phone }}" required>
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" value="{{ form_data.email }}" required>
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required>
+
+      <label for="confirm_password">Confirm Password</label>
+      <input id="confirm_password" name="confirm_password" type="password" required>
+
+      <button class="btn" type="submit">Create Account</button>
+    </form>
+
+    <p class="auth-link muted">
+      Already have an account? <a href="/login">Log in</a>
+    </p>
+  </article>
+</section>
+{% endblock %}

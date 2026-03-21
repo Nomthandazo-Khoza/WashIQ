@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Contact WashIQ{% endblock %}
+{% block meta_description %}Contact WashIQ in Durban for car wash bookings, secure parking information, and service support.{% endblock %}
+
+{% block content %}
+<section class="card page-header">
+  <p class="eyebrow">Contact WashIQ</p>
+  <h1>Let's get your vehicle service sorted</h1>
+  <p class="muted">
+    Reach out for service questions, booking support, or business inquiries.
+  </p>
+</section>
+
+<section class="section grid contact-layout">
+  <article class="card">
+    <h2>Contact Information</h2>
+    <div class="contact-list">
+      <p><strong>Location:</strong> Durban, South Africa</p>
+      <p><strong>Phone:</strong> +27 00 000 0000</p>
+      <p><strong>Email:</strong> hello@washiq.co.za</p>
+      <p><strong>Operating Hours:</strong> Mon-Sat, 7:00 AM - 7:00 PM</p>
+    </div>
+    <a class="btn whatsapp-btn" href="#" aria-label="Chat on WhatsApp">Chat on WhatsApp</a>
+  </article>
+
+  <article class="card map-card">
+    <h2>Find Us</h2>
+    <div class="map-placeholder">
+      <p>Map Placeholder</p>
+      <span>Embed map here in a future phase</span>
+    </div>
+  </article>
+</section>
+
+<section class="section">
+  <article class="card">
+    <h2>Send Us a Message</h2>
+    <p class="muted">Our team usually responds within one business day.</p>
+    <form class="booking-form contact-form" method="post" action="#">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" required>
+
+      <label for="phone">Phone</label>
+      <input id="phone" name="phone" type="text" required>
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required>
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="5" required></textarea>
+
+      <button class="btn" type="submit">Send Message</button>
+    </form>
+  </article>
+</section>
+
+<section class="section">
+  <article class="card local-seo-block">
+    <p class="eyebrow">Business Enquiries</p>
+    <h2>Need fleet or recurring service support?</h2>
+    <p>
+      If you manage multiple vehicles or need repeat bookings, contact us for tailored scheduling
+      options. We can help you set up a simple and dependable service routine.
+    </p>
+  </article>
+</section>
+{% endblock %}

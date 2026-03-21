@@ -1,0 +1,32 @@
+{% extends "admin/layout.html" %}
+{% block title %}Customers | Admin | WashIQ{% endblock %}
+{% block meta_description %}WashIQ admin customer management.{% endblock %}
+
+{% block admin_main %}
+<header class="admin-main-header admin-main-header--compact">
+  <div>
+    <p class="eyebrow">Admin</p>
+    <h1>Customers</h1>
+    <p class="muted">Customer directory and management tools.</p>
+  </div>
+
+  <div class="admin-main-user">
+    {% if current_customer %}
+      <div class="muted small-muted">
+        Signed in as <strong>{{ current_customer.full_name }}</strong>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/logout" class="logout-form">
+      <button class="btn btn-ghost btn-sm" type="submit">Logout</button>
+    </form>
+  </div>
+</header>
+
+<section class="section admin-page-section">
+  <article class="card">
+    <h2>Coming soon</h2>
+    <p class="muted">Customer management and a customer list will be available in a later phase.</p>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+{% block title %}Payment | WashIQ{% endblock %}
+{% block meta_description %}Complete your WashIQ payment using a clean mock MVP flow (Pay Now or Pay Later).{% endblock %}
+
+{% block content %}
+<section class="customer-dashboard-shell">
+  <aside class="customer-sidebar card">
+    <div class="customer-sidebar-brand">
+      <p class="eyebrow">Customer Portal</p>
+      <strong class="customer-sidebar-title">WashIQ</strong>
+      <span class="customer-sidebar-subtitle muted">Manage bookings & services</span>
+    </div>
+
+    <nav class="customer-side-nav" aria-label="Customer navigation">
+      <a class="customer-nav-item" href="/profile#dashboard-overview">
+        <span class="customer-nav-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 12c2.761 0 5-2.239 5-5S14.761 2 12 2 7 4.239 7 7s2.239 5 5 5Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M4 22c1.8-4.5 5-7 8-7s6.2 2.5 8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        Dashboard
+      </a>
+
+      <a class="customer-nav-item" href="/profile#my-bookings">
+        <span class="customer-nav-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 7h10M8 12h10M8 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M4 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </span>
+        My Bookings
+      </a>
+
+      <a class="customer-nav-item" href="/booking">
+        <span class="customer-nav-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 7V3m8 4V3M4 9h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M6 5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </span>
+        Book a Service
+      </a>
+
+      <a class="customer-nav-item active" href="/payment">
+        <span class="customer-nav-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 1v22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        Payments
+      </a>
+
+      <a class="customer-nav-item" href="/profile#customer-details">
+        <span class="customer-nav-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        Profile
+      </a>
+    </nav>
+
+    <div class="customer-sidebar-footer">
+      <form method="post" action="/logout" class="customer-sidebar-logout">
+        <button class="btn btn-ghost" type="submit">Logout</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="customer-main">
+    <section class="payment-header card">
+      <p class="eyebrow">Payment</p>
+      <h1>Complete your payment</h1>
+      <p class="muted">Choose when to pay and how you would like to pay. This is a mock MVP flow (no gateway integration).</p>
+    </section>
+
+{% if payment_result %}
+  <section class="card payment-success">
+    <p class="eyebrow">Payment Confirmation</p>
+    <h2>Payment request recorded successfully</h2>
+
+    <div class="success-grid">
+      <div><span>Item</span><strong>{{ payment_result.item_name }}</strong></div>
+      <div><span>Amount</span><strong>R{{ payment_result.amount|int }}</strong></div>
+      <div><span>Timing</span><strong>{{ payment_result.timing_label }}</strong></div>
+      <div><span>Method</span><strong>{{ payment_result.method_label }}</strong></div>
+      <div><span>Status</span><strong class="status-badge {{ payment_result.status }}">{{ payment_result.status }}</strong></div>
+      <div><span>Provider</span><strong>{{ payment_result.provider }}</strong></div>
+      <div><span>Reference</span><strong>{{ payment_result.provider_reference }}</strong></div>
+    </div>
+
+    <div class="hero-actions">
+      <a class="btn" href="/profile#dashboard-overview">Back to Dashboard</a>
+      <a class="btn btn-ghost" href="/profile#customer-details">Go to Profile</a>
+      <a class="btn btn-ghost" href="/payment">Make Another Payment</a>
+    </div>
+  </section>
+{% else %}
+  <section class="payment-layout">
+    <article class="card payment-form-card">
+      <h2>Payment Details</h2>
+      <p class="muted">Select a timing, then choose a method. Card details appear only when you pick Pay Now + Card.</p>
+
+      {% if error_message %}
+        <div class="alert error" role="alert">{{ error_message }}</div>
+      {% endif %}
+
+      <form method="post" action="/payment" class="booking-form" id="payment-form">
+        {% if booking %}
+          <input type="hidden" name="booking_id" value="{{ booking.id }}">
+        {% endif %}
+
+        <div class="form-section">
+          <h3>Payment Timing</h3>
+          <div class="choice-grid choice-grid-2">
+            <label class="choice-option {% if selected_timing == 'pay_now' %}active{% endif %}">
+              <input type="radio" name="payment_action" value="pay_now" {% if selected_timing == 'pay_now' %}checked{% endif %}>
+              <div>
+                <strong>Pay Now</strong>
+                <span class="choice-subtitle">Creates a <b>paid</b> payment record</span>
+              </div>
+            </label>
+
+            <label class="choice-option {% if selected_timing == 'pay_later' %}active{% endif %}">
+              <input type="radio" name="payment_action" value="pay_later" {% if selected_timing == 'pay_later' %}checked{% endif %}>
+              <div>
+                <strong>Pay Later</strong>
+                <span class="choice-subtitle">Creates a <b>pending</b> payment request</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Payment Method</h3>
+
+          <div id="methods-pay-now" class="timing-methods" {% if selected_timing != 'pay_now' %}hidden{% endif %}>
+            <div class="choice-grid choice-grid-4">
+              {% for method in pay_now_methods %}
+                <label class="choice-option {% if selected_method == method %}active{% endif %}">
+                  <input type="radio" name="payment_method" value="{{ method }}" {% if selected_method == method %}checked{% endif %}>
+                  <div>
+                    <strong>{{ method_labels[method] }}</strong>
+                    <span class="choice-subtitle">{{ method_help[method] }}</span>
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div id="methods-pay-later" class="timing-methods" {% if selected_timing != 'pay_later' %}hidden{% endif %}>
+            <div class="choice-grid choice-grid-2">
+              {% for method in pay_later_methods %}
+                <label class="choice-option {% if selected_method == method %}active{% endif %}">
+                  <input type="radio" name="payment_method" value="{{ method }}" {% if selected_method == method %}checked{% endif %}>
+                  <div>
+                    <strong>{{ method_labels[method] }}</strong>
+                    <span class="choice-subtitle">{{ method_help[method] }}</span>
+                  </div>
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div id="card-details" class="conditional-block" {% if not (selected_timing == 'pay_now' and selected_method == 'card') %}hidden{% endif %}>
+            <h3 class="section-label">Card Details (Mock)</h3>
+            <p class="helper-text">These fields are for UI and MVP testing only.</p>
+
+            <div class="card-details-grid">
+              <div class="field-row">
+                <label for="cardholder_name">Cardholder Name</label>
+                <input
+                  id="cardholder_name"
+                  type="text"
+                  name="cardholder_name"
+                  value="{{ cardholder_name }}"
+                  required
+                  {% if not (selected_timing == 'pay_now' and selected_method == 'card') %}disabled{% endif %}
+                >
+              </div>
+
+              <div class="field-row">
+                <label for="card_number">Card Number</label>
+                <input
+                  id="card_number"
+                  type="text"
+                  name="card_number"
+                  value="{{ card_number }}"
+                  placeholder="1234 5678 9012 3456"
+                  required
+                  {% if not (selected_timing == 'pay_now' and selected_method == 'card') %}disabled{% endif %}
+                >
+              </div>
+
+              <div class="field-row">
+                <label for="expiry_date">Expiry Date</label>
+                <input
+                  id="expiry_date"
+                  type="text"
+                  name="expiry_date"
+                  value="{{ expiry_date }}"
+                  placeholder="MM/YY"
+                  required
+                  {% if not (selected_timing == 'pay_now' and selected_method == 'card') %}disabled{% endif %}
+                >
+              </div>
+
+              <div class="field-row">
+                <label for="cvv">CVV</label>
+                <input
+                  id="cvv"
+                  type="password"
+                  name="cvv"
+                  value="{{ cvv }}"
+                  placeholder="123"
+                  required
+                  {% if not (selected_timing == 'pay_now' and selected_method == 'card') %}disabled{% endif %}
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Package Selection</h3>
+          <p class="muted small-muted">Used when no booking is linked. If a booking is linked, the booking amount will be used.</p>
+
+          <div class="service-chip-list">
+            {% for package in packages %}
+              <label class="package-option {% if selected_package == package.name %}active{% endif %}">
+                <input type="radio" name="selected_package" value="{{ package.name }}" {% if selected_package == package.name %}checked{% endif %}>
+                <span>{{ package.name }}</span>
+                <strong>R{{ package.amount }}</strong>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="payment-actions">
+          <button class="btn" type="submit">
+            <span id="submit-label">{% if selected_timing == 'pay_now' %}Pay Now{% else %}Pay Later{% endif %}</span>
+          </button>
+        </div>
+      </form>
+    </article>
+
+    <aside class="card payment-summary-card">
+      <h2>Summary</h2>
+
+      {% if booking %}
+        <p class="muted">Payment linked to booking #{{ booking.id }}.</p>
+        <div class="summary-list">
+          <div><span>Service</span><strong>{{ booking.service }}</strong></div>
+          <div><span>Date</span><strong>{{ booking.booking_date }}</strong></div>
+          <div><span>Time Slot</span><strong>{{ booking.time_slot }}</strong></div>
+          <div><span>Vehicle</span><strong>{{ booking.car_model }} - {{ booking.registration_number }}</strong></div>
+        </div>
+      {% else %}
+        <p class="muted">No booking selected. You can still purchase a package.</p>
+      {% endif %}
+
+      <div class="summary-list">
+        <div><span>Payment Timing</span><strong id="summary-timing">{{ timing_labels[selected_timing] }}</strong></div>
+        <div><span>Payment Method</span><strong id="summary-method">{{ method_labels[selected_method] }}</strong></div>
+        <div><span>Amount</span><strong>R{{ selected_amount|int }}</strong></div>
+        <div>
+          <span>Resulting Status</span>
+          <strong class="status-badge {{ status_badge }}" id="summary-status-badge">{{ status_badge }}</strong>
+        </div>
+      </div>
+
+      <div class="info-block">
+        <h3>Helpful Info</h3>
+        <p id="method-help-text">{{ payment_method_help }}</p>
+      </div>
+    </aside>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const timingRadios = document.querySelectorAll('input[name="payment_action"]');
+      const methodRadios = document.querySelectorAll('input[name="payment_method"]');
+
+      const methodsPayNow = document.getElementById('methods-pay-now');
+      const methodsPayLater = document.getElementById('methods-pay-later');
+      const cardDetails = document.getElementById('card-details');
+
+      const submitLabel = document.getElementById('submit-label');
+      const summaryTiming = document.getElementById('summary-timing');
+      const summaryMethod = document.getElementById('summary-method');
+      const summaryStatusBadge = document.getElementById('summary-status-badge');
+      const methodHelpText = document.getElementById('method-help-text');
+
+      const cardInputs = [
+        document.getElementById('cardholder_name'),
+        document.getElementById('card_number'),
+        document.getElementById('expiry_date'),
+        document.getElementById('cvv'),
+      ].filter(Boolean);
+
+      function getCheckedRadio(name) {
+        const el = document.querySelector('input[name="' + name + '"]:checked');
+        return el || null;
+      }
+
+      function sync() {
+        const timing = (getCheckedRadio('payment_action') || {}).value || 'pay_now';
+        const isPayNow = timing === 'pay_now';
+
+        // Toggle method sections.
+        if (methodsPayNow) methodsPayNow.hidden = !isPayNow;
+        if (methodsPayLater) methodsPayLater.hidden = isPayNow;
+
+        // Ensure a method is selected from the visible group.
+        const visibleGroup = isPayNow ? methodsPayNow : methodsPayLater;
+        const firstVisibleMethod = visibleGroup ? visibleGroup.querySelector('input[name="payment_method"]') : null;
+        let selectedMethodRadio = getCheckedRadio('payment_method');
+
+        if (!selectedMethodRadio || (visibleGroup && !visibleGroup.contains(selectedMethodRadio))) {
+          if (firstVisibleMethod) firstVisibleMethod.checked = true;
+          selectedMethodRadio = firstVisibleMethod;
+        }
+
+        const selectedMethodValue = (selectedMethodRadio || {}).value || 'card';
+        const selectedMethodLabel = selectedMethodRadio
+          ? (selectedMethodRadio.closest('label')?.querySelector('strong') || {}).textContent || selectedMethodValue
+          : selectedMethodValue;
+
+        const selectedTimingLabel = getCheckedRadio('payment_action')
+          ? (getCheckedRadio('payment_action').closest('label')?.querySelector('strong') || {}).textContent || timing
+          : timing;
+
+        // Update active highlighting.
+        document.querySelectorAll('input[name="payment_action"]').forEach(r => {
+          const label = r.closest('label');
+          if (label) label.classList.toggle('active', r.checked);
+        });
+        document.querySelectorAll('input[name="payment_method"]').forEach(r => {
+          const label = r.closest('label');
+          if (label) label.classList.toggle('active', r.checked);
+        });
+
+        // Toggle card fields (only for Pay Now + Card).
+        const showCardFields = isPayNow && selectedMethodValue === 'card';
+        if (cardDetails) cardDetails.hidden = !showCardFields;
+        cardInputs.forEach(i => { i.disabled = !showCardFields; });
+
+        // Update submit + summary.
+        if (submitLabel) submitLabel.textContent = isPayNow ? 'Pay Now' : 'Pay Later';
+        if (summaryTiming) summaryTiming.textContent = selectedTimingLabel;
+        if (summaryMethod) summaryMethod.textContent = selectedMethodLabel;
+        if (methodHelpText) {
+          const subtitle = selectedMethodRadio
+            ? selectedMethodRadio.closest('label')?.querySelector('.choice-subtitle')
+            : null;
+          methodHelpText.textContent = subtitle ? subtitle.textContent.trim() : '';
+        }
+
+        const predictedStatus = isPayNow ? 'paid' : 'pending';
+        if (summaryStatusBadge) {
+          summaryStatusBadge.textContent = predictedStatus;
+          summaryStatusBadge.className = 'status-badge ' + predictedStatus;
+        }
+      }
+
+      timingRadios.forEach(r => r.addEventListener('change', sync));
+      methodRadios.forEach(r => r.addEventListener('change', sync));
+      sync();
+    });
+  </script>
+{% endif %}
+  </main>
+</section>
+{% endblock %}

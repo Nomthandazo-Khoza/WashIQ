@@ -1,0 +1,32 @@
+{% extends "admin/layout.html" %}
+{% block title %}Bookings | Admin | WashIQ{% endblock %}
+{% block meta_description %}Manage WashIQ bookings from the admin console.{% endblock %}
+
+{% block admin_main %}
+<header class="admin-main-header admin-main-header--compact">
+  <div>
+    <p class="eyebrow">Admin</p>
+    <h1>Bookings</h1>
+    <p class="muted">Review and manage all customer bookings.</p>
+  </div>
+
+  <div class="admin-main-user">
+    {% if current_customer %}
+      <div class="muted small-muted">
+        Signed in as <strong>{{ current_customer.full_name }}</strong>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/logout" class="logout-form">
+      <button class="btn btn-ghost btn-sm" type="submit">Logout</button>
+    </form>
+  </div>
+</header>
+
+<section class="section admin-page-section">
+  <article class="card dashboard-table-card">
+    <h2>All bookings</h2>
+    {% include "admin/bookings_table.html" %}
+  </article>
+</section>
+{% endblock %}
