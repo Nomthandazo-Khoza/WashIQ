@@ -3,6 +3,6 @@ uvicorn
 jinja2
 sqlalchemy
 passlib[bcrypt]
-pydantic
-email-validator
 python-multipart
+email-validator
+itsdangerous
