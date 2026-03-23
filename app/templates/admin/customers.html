@@ -1,13 +1,13 @@
 {% extends "admin/layout.html" %}
 {% block title %}Customers | Admin | WashIQ{% endblock %}
-{% block meta_description %}WashIQ admin customer management.{% endblock %}
+{% block meta_description %}WashIQ admin — customer directory, spend, and booking activity.{% endblock %}
 
 {% block admin_main %}
 <header class="admin-main-header admin-main-header--compact">
   <div>
     <p class="eyebrow">Admin</p>
     <h1>Customers</h1>
-    <p class="muted">Customer directory and management tools.</p>
+    <p class="muted">Directory, engagement, and revenue tied to customer accounts.</p>
   </div>
 
   <div class="admin-main-user">
@@ -23,10 +23,128 @@
   </div>
 </header>
 
+<section class="dashboard-metrics dashboard-metrics--customers" aria-label="Customer analytics">
+  <article class="card stat-card">
+    <span>Total customers</span>
+    <strong>{{ customer_analytics.total_customers }}</strong>
+    <span class="stat-card-hint">All accounts</span>
+  </article>
+  <article class="card stat-card stat-card--accent">
+    <span>Active customers</span>
+    <strong>{{ customer_analytics.active_customers }}</strong>
+    <span class="stat-card-hint">At least one booking</span>
+  </article>
+  <article class="card stat-card stat-card--teal">
+    <span>Returning customers</span>
+    <strong>{{ customer_analytics.returning_customers }}</strong>
+    <span class="stat-card-hint">More than one booking</span>
+  </article>
+  <article class="card stat-card">
+    <span>Total customer revenue</span>
+    <strong>R{{ customer_analytics.total_customer_revenue_display }}</strong>
+    <span class="stat-card-hint">Paid payments linked to customers</span>
+  </article>
+</section>
+
 <section class="section admin-page-section">
-  <article class="card">
-    <h2>Coming soon</h2>
-    <p class="muted">Customer management and a customer list will be available in a later phase.</p>
+  <article class="card admin-customers-table-card">
+    <div class="admin-customers-card-head">
+      <div>
+        <h2>Customer directory</h2>
+        <p class="muted small-muted admin-customers-lead">Search by name or email. Filter by booking activity.</p>
+      </div>
+    </div>
+
+    <form class="admin-customers-filters" method="get" action="/dashboard/customers">
+      <div class="admin-customers-filter-group admin-customers-search-group">
+        <label class="admin-customers-filter-label" for="cust-search">Search</label>
+        <input
+          id="cust-search"
+          class="input admin-customers-search-input"
+          type="search"
+          name="search"
+          value="{{ customers_search }}"
+          placeholder="Name or email…"
+          autocomplete="off"
+        >
+      </div>
+      <div class="admin-customers-filter-group">
+        <label class="admin-customers-filter-label" for="cust-filter">Segment</label>
+        <select id="cust-filter" class="input admin-customers-select" name="filter">
+          <option value="all" {% if customers_segment_filter == 'all' %}selected{% endif %}>All customers</option>
+          <option value="active" {% if customers_segment_filter == 'active' %}selected{% endif %}>Active (≥1 booking)</option>
+          <option value="returning" {% if customers_segment_filter == 'returning' %}selected{% endif %}>Returning (&gt;1 booking)</option>
+        </select>
+      </div>
+      <div class="admin-customers-filter-actions">
+        <button class="btn btn-sm" type="submit">Apply</button>
+        {% if customers_filters_active %}
+          <a class="btn btn-sm btn-ghost" href="/dashboard/customers">Clear</a>
+        {% endif %}
+      </div>
+    </form>
+
+    {% if customer_rows and customer_rows|length > 0 %}
+      <div class="dashboard-table-wrap admin-customers-table-wrap">
+        <table class="dashboard-table admin-customers-table">
+          <thead>
+            <tr>
+              <th>Full name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Bookings</th>
+              <th>Paid</th>
+              <th>Loyalty</th>
+              <th>Total spend</th>
+              <th>Last booking</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in customer_rows %}
+              <tr>
+                <td>
+                  <strong>{{ row.full_name }}</strong>
+                  {% if row.is_admin %}
+                    <span class="admin-inline-badge" title="Administrator account">Admin</span>
+                  {% endif %}
+                </td>
+                <td class="admin-customers-email-cell">{{ row.email }}</td>
+                <td>{{ row.phone }}</td>
+                <td>{{ row.total_bookings }}</td>
+                <td>{{ row.paid_bookings }}</td>
+                <td><span class="muted">{{ row.loyalty_display }}</span></td>
+                <td><strong>R{{ row.total_spend_display }}</strong></td>
+                <td class="admin-customers-date-cell">{{ row.last_booking_display }}</td>
+                <td>
+                  <div class="admin-customers-actions">
+                    <a class="action-link" href="/dashboard/customers/{{ row.id }}">View</a>
+                    <a class="action-link muted-action" href="/dashboard/customers/{{ row.id }}#bookings">Bookings</a>
+                    <a class="action-link muted-action" href="/dashboard/customers/{{ row.id }}#payments">Payments</a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="admin-customers-empty-inner">
+        {% if customers_has_any and customers_filters_active %}
+          <h3 class="admin-customers-empty-title">No customers match</h3>
+          <p class="muted">Try another search or switch segment back to <strong>All customers</strong>.</p>
+          <p class="admin-customers-empty-actions">
+            <a class="btn btn-sm" href="/dashboard/customers">Clear filters</a>
+          </p>
+        {% elif customers_has_any %}
+          <h3 class="admin-customers-empty-title">No rows to show</h3>
+          <p class="muted">Something went wrong loading the list — refresh or check the server log.</p>
+        {% else %}
+          <h3 class="admin-customers-empty-title">No customers yet</h3>
+          <p class="muted">Accounts appear when people register or when you seed test users.</p>
+        {% endif %}
+      </div>
+    {% endif %}
   </article>
 </section>
 {% endblock %}

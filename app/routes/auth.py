@@ -15,7 +15,7 @@ from app.auth import (
     verify_password,
 )
 from app.database import get_db
-from app.models import Booking, Customer
+from app.models import Customer
 
 router = APIRouter()
 
@@ -136,7 +136,7 @@ def signup(
 
         request.session["customer_id"] = customer.id
         return RedirectResponse(
-            url="/profile",
+            url="/customer",
             status_code=status.HTTP_303_SEE_OTHER,
         )
     except Exception:
@@ -230,11 +230,11 @@ def login(
         if next_path and not next_path.startswith("/"):
             next_path = None
 
-        # Admins go to the ops dashboard by default; customers fall back to profile.
+        # Admins go to the ops dashboard by default; customers to the customer portal home.
         if is_admin_customer(customer):
             redirect_url = next_path or "/dashboard"
         else:
-            redirect_url = next_path or "/profile"
+            redirect_url = next_path or "/customer"
         return RedirectResponse(url=redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     except Exception:
         # Best-effort fallback: render the login page with a generic error.
@@ -268,24 +268,3 @@ def logout(request: Request):
     return RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
 
 
-@router.get("/profile")
-def profile_page(request: Request, db: Session = Depends(get_db)):
-    current_customer = get_current_customer(request, db)
-    if not current_customer:
-        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-    if current_customer and is_admin_customer(current_customer):
-        return RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)
-
-    bookings = (
-        db.query(Booking)
-        .filter(Booking.customer_id == current_customer.id)
-        .order_by(Booking.created_at.desc())
-        .all()
-    )
-
-    context = {
-        "request": request,
-        "bookings": bookings,
-    }
-    context.update(auth_template_context(request, db))
-    return templates.TemplateResponse("profile.html", context)

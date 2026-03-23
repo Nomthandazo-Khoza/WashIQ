@@ -1,0 +1,112 @@
+{% extends "admin/layout.html" %}
+{% block title %}Customer feedback | WashIQ Admin{% endblock %}
+{% block meta_description %}View WashIQ customer ratings and comments.{% endblock %}
+
+{% block admin_main %}
+<header class="admin-main-header admin-main-header--compact">
+  <div>
+    <p class="eyebrow">Feedback</p>
+    <h1>Customer ratings &amp; comments</h1>
+    <p class="muted">Reviews from logged-in customers in the portal.</p>
+  </div>
+  <div class="admin-main-user">
+    {% if current_customer %}
+      <div class="muted small-muted">Signed in as <strong>{{ current_customer.full_name }}</strong></div>
+    {% endif %}
+    <form method="post" action="/logout" class="logout-form">
+      <button class="btn btn-ghost btn-sm" type="submit">Logout</button>
+    </form>
+  </div>
+</header>
+
+<section class="dashboard-metrics dashboard-metrics--feedback" aria-label="Feedback summary">
+  <article class="card stat-card">
+    <span>Total entries</span>
+    <strong>{{ feedback_metrics.total }}</strong>
+  </article>
+  <article class="card stat-card stat-card--teal">
+    <span>Average rating</span>
+    <strong>{{ feedback_metrics.average_display }}</strong>
+    <span class="stat-card-hint">Out of 5</span>
+  </article>
+  <article class="card stat-card stat-card--accent">
+    <span>5-star reviews</span>
+    <strong>{{ feedback_metrics.five_star }}</strong>
+  </article>
+  <article class="card stat-card">
+    <span>Last 30 days</span>
+    <strong>{{ feedback_metrics.recent_30d }}</strong>
+    <span class="stat-card-hint">New feedback</span>
+  </article>
+</section>
+
+<section class="section admin-page-section">
+  <article class="card admin-feedback-table-card">
+    <h2>All feedback</h2>
+    <form class="admin-feedback-filters" method="get" action="/dashboard/feedback">
+      <div class="admin-feedback-filter-group">
+        <label class="admin-feedback-filter-label" for="fb-rating">Rating</label>
+        <select id="fb-rating" class="input" name="rating">
+          <option value="all" {% if feedback_rating_filter == 'all' %}selected{% endif %}>All ratings</option>
+          <option value="5" {% if feedback_rating_filter == 5 %}selected{% endif %}>5 stars</option>
+          <option value="4" {% if feedback_rating_filter == 4 %}selected{% endif %}>4 stars</option>
+          <option value="3" {% if feedback_rating_filter == 3 %}selected{% endif %}>3 stars</option>
+          <option value="2" {% if feedback_rating_filter == 2 %}selected{% endif %}>2 stars</option>
+          <option value="1" {% if feedback_rating_filter == 1 %}selected{% endif %}>1 star</option>
+        </select>
+      </div>
+      <div class="admin-feedback-filter-group admin-feedback-search-group">
+        <label class="admin-feedback-filter-label" for="fb-search">Customer</label>
+        <input id="fb-search" class="input" type="search" name="search" value="{{ feedback_search }}" placeholder="Name or email" autocomplete="off">
+      </div>
+      <div class="admin-feedback-filter-actions">
+        <button class="btn btn-sm" type="submit">Apply</button>
+        {% if feedback_filters_active %}
+          <a class="btn btn-sm btn-ghost" href="/dashboard/feedback">Clear</a>
+        {% endif %}
+      </div>
+    </form>
+    {% if feedback_rows %}
+      <div class="dashboard-table-wrap">
+        <table class="dashboard-table admin-feedback-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Rating</th>
+              <th>Comment</th>
+              <th>Booking / service</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in feedback_rows %}
+              <tr>
+                <td class="muted">{{ row.created_at_label }}</td>
+                <td>
+                  <strong>{{ row.customer_name }}</strong><br>
+                  <span class="muted small-muted">{{ row.customer_email }}</span>
+                </td>
+                <td>
+                  <span class="admin-feedback-stars" title="{{ row.rating }} of 5">{{ row.stars_display }}</span>
+                  <span class="feedback-rating-badge admin-feedback-rating-num">{{ row.rating }} / 5</span>
+                </td>
+                <td class="admin-feedback-comment-cell">{{ row.comment }}</td>
+                <td class="muted small-muted">{{ row.booking_label }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="admin-empty-card">
+        {% if feedback_filters_active %}
+          <p class="muted">No feedback matches these filters.</p>
+          <p><a class="action-link" href="/dashboard/feedback">Clear filters</a></p>
+        {% else %}
+          <p class="muted">No feedback submitted yet.</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

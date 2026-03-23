@@ -23,22 +23,42 @@
   </div>
 </header>
 
-<section class="dashboard-metrics">
+<section class="dashboard-metrics dashboard-metrics--phase-e" aria-label="Key metrics">
   <article class="card stat-card">
-    <span>Total Bookings</span>
+    <span>Total bookings</span>
     <strong>{{ metrics.total_bookings }}</strong>
   </article>
+  <article class="card stat-card stat-card--accent">
+    <span>Bookings today</span>
+    <strong>{{ metrics.bookings_today }}</strong>
+    <span class="stat-card-hint">By scheduled date</span>
+  </article>
+  <article class="card stat-card stat-card--accent">
+    <span>This week</span>
+    <strong>{{ metrics.bookings_this_week }}</strong>
+    <span class="stat-card-hint muted">{{ metrics.week_label }}</span>
+  </article>
   <article class="card stat-card">
-    <span>Paid Bookings</span>
+    <span>Paid bookings</span>
     <strong>{{ metrics.paid_bookings }}</strong>
   </article>
   <article class="card stat-card">
-    <span>Unpaid Bookings</span>
+    <span>Unpaid bookings</span>
     <strong>{{ metrics.unpaid_bookings }}</strong>
   </article>
   <article class="card stat-card">
-    <span>Total Revenue</span>
+    <span>Total revenue</span>
     <strong>R{{ metrics.total_revenue_display }}</strong>
+    <span class="stat-card-hint">From paid bookings</span>
+  </article>
+  <article class="card stat-card stat-card--teal">
+    <span>Return rate</span>
+    <strong>{{ metrics.return_rate_pct }}%</strong>
+    {% if metrics.return_rate_customers > 0 %}
+      <span class="stat-card-hint">Customers with more than one booking ({{ metrics.return_rate_returning }} / {{ metrics.return_rate_customers }})</span>
+    {% else %}
+      <span class="stat-card-hint">No customers with bookings yet</span>
+    {% endif %}
   </article>
 </section>
 
@@ -46,19 +66,21 @@
   <article class="card dashboard-table-card">
     <h2>Recent Bookings</h2>
     {% set bookings = recent_bookings %}
+    {% set admin_bookings_return = '/dashboard' %}
     {% include "admin/bookings_table.html" %}
   </article>
 
   <article class="card dashboard-alerts-card">
-    <h2>Actionable Alerts</h2>
+    <h2>Operational alerts</h2>
+    <p class="muted small-muted dashboard-alerts-lead">Unpaid balances (oldest first) and uncollected overnight parking (past booking date, not marked collected).</p>
     {% if alerts %}
       <div class="alert-list">
         {% for alert in alerts %}
-          <div class="alert-item">{{ alert }}</div>
+          <div class="alert-item alert-item--{{ alert.kind }}" role="status">{{ alert.message }}</div>
         {% endfor %}
       </div>
     {% else %}
-      <div class="alert-all-clear">All clear. No outstanding payment alerts right now.</div>
+      <div class="alert-all-clear">All clear — no outstanding unpaid bookings or uncollected overnight vehicles on the current rules.</div>
     {% endif %}
     <p class="dashboard-note muted">
       Dev note: mark an admin directly in SQLite by setting <code>customers.is_admin = 1</code> for your account.
@@ -66,6 +88,39 @@
     <p class="dashboard-note muted" style="margin-top: 0.5rem;">
       <a class="action-link" href="/dashboard/bookings">View all bookings &rarr;</a>
     </p>
+  </article>
+</section>
+
+<section class="section dashboard-feedback-section">
+  <article class="card dashboard-feedback-card">
+    <div class="dashboard-feedback-header">
+      <h2>Recent customer feedback</h2>
+      {% if feedback_avg_rating is not none %}
+        <span class="feedback-avg-pill">Avg {{ feedback_avg_rating }} / 5</span>
+      {% endif %}
+    </div>
+    {% if recent_feedback and recent_feedback|length > 0 %}
+      <ul class="dashboard-feedback-list">
+        {% for row in recent_feedback %}
+          <li class="dashboard-feedback-item">
+            <div class="dashboard-feedback-top">
+              <strong>{{ row.customer_name }}</strong>
+              <span class="feedback-rating-badge">{{ row.rating }}★</span>
+            </div>
+            <p class="dashboard-feedback-comment">{{ row.comment }}</p>
+            <p class="muted small-muted">{{ row.created_at_label }}{% if row.booking_id %} · {{ row.booking_label }}{% endif %}</p>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="dashboard-note muted" style="margin-top: 0.75rem;">
+        <a class="action-link" href="/dashboard/feedback">View all feedback &rarr;</a>
+      </p>
+    {% else %}
+      <p class="muted">No feedback yet — customers can submit reviews from their portal.</p>
+      <p class="dashboard-note muted" style="margin-top: 0.5rem;">
+        <a class="action-link" href="/dashboard/feedback">Feedback page &rarr;</a>
+      </p>
+    {% endif %}
   </article>
 </section>
 {% endblock %}

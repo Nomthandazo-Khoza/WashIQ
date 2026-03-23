@@ -1,0 +1,191 @@
+{% extends "admin/layout.html" %}
+{% block title %}Promotions | WashIQ Admin{% endblock %}
+{% block meta_description %}Create and manage WashIQ homepage promotions.{% endblock %}
+
+{% block admin_main %}
+<header class="admin-main-header admin-main-header--compact">
+  <div>
+    <p class="eyebrow">Marketing</p>
+    <h1>Promotions</h1>
+    <p class="muted">Control the homepage promo banner. The <strong>newest</strong> active promotion in its date window is shown on the homepage.</p>
+  </div>
+
+  <div class="admin-main-user">
+    {% if current_customer %}
+      <div class="muted small-muted">
+        Signed in as <strong>{{ current_customer.full_name }}</strong>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/logout" class="logout-form">
+      <button class="btn btn-ghost btn-sm" type="submit">Logout</button>
+    </form>
+  </div>
+</header>
+
+{% if promo_created %}
+  <p class="alert success promotions-flash" role="status">Promotion created.</p>
+{% endif %}
+{% if promo_updated %}
+  <p class="alert success promotions-flash" role="status">Promotion updated.</p>
+{% endif %}
+{% if promo_deleted %}
+  <p class="alert success promotions-flash" role="status">Promotion deleted.</p>
+{% endif %}
+{% if promo_form_error %}
+  <p class="alert error promotions-flash" role="alert">{{ promo_form_error }}</p>
+{% endif %}
+
+<section class="dashboard-metrics dashboard-metrics--promotions" aria-label="Promotion overview">
+  <article class="card stat-card">
+    <span>Total promotions</span>
+    <strong>{{ promo_summary.total }}</strong>
+  </article>
+  <article class="card stat-card stat-card--accent">
+    <span>Active</span>
+    <strong>{{ promo_summary.active_count }}</strong>
+    <span class="stat-card-hint">Marked active in admin</span>
+  </article>
+  <article class="card stat-card">
+    <span>Scheduled</span>
+    <strong>{{ promo_summary.scheduled_count }}</strong>
+    <span class="stat-card-hint">Active, start date in the future</span>
+  </article>
+  <article class="card stat-card stat-card--teal">
+    <span>Eligible today</span>
+    <strong>{{ promo_summary.eligible_today_count }}</strong>
+    <span class="stat-card-hint">Active + in date window</span>
+  </article>
+  <article class="card stat-card">
+    <span>Live on homepage</span>
+    {% if promo_summary.live_id and promo_summary.live_title %}
+      <strong class="admin-promo-live-title" title="{{ promo_summary.live_title }}">#{{ promo_summary.live_id }}</strong>
+      <span class="stat-card-hint">{{ promo_summary.live_title[:52] }}{% if promo_summary.live_title|length > 52 %}…{% endif %}</span>
+    {% else %}
+      <strong>—</strong>
+      <span class="stat-card-hint">Fallback strip on homepage</span>
+    {% endif %}
+  </article>
+</section>
+
+<section class="section admin-promo-layout">
+  <article class="card admin-promo-form-card">
+    <h2>Add promotion</h2>
+    <p class="muted small-muted">Title and description are required. Dates are optional (YYYY-MM-DD). Leave dates blank for “always on” while active.</p>
+    <form class="booking-form admin-promo-form" method="post" action="/dashboard/promotions">
+      <label for="promo-title">Title</label>
+      <input id="promo-title" name="title" type="text" maxlength="200" required value="{{ form_title }}">
+
+      <label for="promo-description">Description</label>
+      <textarea id="promo-description" name="description" rows="4" required>{{ form_description }}</textarea>
+
+      <label for="promo-badge">Badge <span class="muted">(optional, e.g. “Weekend special”)</span></label>
+      <input id="promo-badge" name="badge_text" type="text" maxlength="80" value="{{ form_badge_text }}" placeholder="Weekend special">
+
+      <label for="promo-cta-text">CTA button text <span class="muted">(optional)</span></label>
+      <input id="promo-cta-text" name="cta_text" type="text" maxlength="120" value="{{ form_cta_text }}" placeholder="Book now">
+
+      <label for="promo-cta-link">CTA link <span class="muted">(optional — defaults to booking)</span></label>
+      <input id="promo-cta-link" name="cta_link" type="text" maxlength="500" value="{{ form_cta_link }}" placeholder="/booking or https://…">
+
+      <div class="admin-promo-dates">
+        <div>
+          <label for="promo-start">Start date</label>
+          <input id="promo-start" name="start_date" type="date" value="{{ form_start_date }}">
+        </div>
+        <div>
+          <label for="promo-end">End date</label>
+          <input id="promo-end" name="end_date" type="date" value="{{ form_end_date }}">
+        </div>
+      </div>
+
+      <label class="admin-checkbox-row">
+        <input type="checkbox" name="active" value="1"{% if form_active_checked %} checked{% endif %}>
+        <span>Active (eligible for homepage when dates match)</span>
+      </label>
+
+      <button class="btn" type="submit">Save promotion</button>
+    </form>
+  </article>
+
+  <article class="card admin-promo-list-card">
+    <h2>All promotions</h2>
+    <p class="muted small-muted admin-promo-list-lead">Homepage shows the newest row that is active and inside its date range. Others may show as <em>queued</em> if a newer eligible promo exists.</p>
+    {% if promotions %}
+      <div class="dashboard-table-wrap admin-promo-table-wrap">
+        <table class="dashboard-table admin-promo-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Badge</th>
+              <th>CTA</th>
+              <th>Dates</th>
+              <th>Created</th>
+              <th>Toggle</th>
+              <th>Homepage</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in promotions %}
+              <tr class="{% if p.live_on_homepage %}admin-promo-row-live{% endif %}">
+                <td>{{ p.id }}</td>
+                <td>
+                  <strong>{{ p.title }}</strong>
+                  <div class="muted small-muted">{{ p.description_short }}</div>
+                </td>
+                <td class="small-muted">{{ p.badge_text }}</td>
+                <td class="small-muted admin-promo-cta-cell">
+                  <span>{{ p.cta_text_short }}</span>
+                  {% if p.cta_link_short != "—" %}
+                    <div class="admin-promo-link-hint" title="{{ p.cta_link_short }}">{{ p.cta_link_short }}</div>
+                  {% endif %}
+                </td>
+                <td class="small-muted">
+                  {% if p.start_date or p.end_date %}
+                    {{ p.start_date or "—" }} → {{ p.end_date or "—" }}
+                  {% else %}
+                    Any time
+                  {% endif %}
+                </td>
+                <td class="small-muted admin-promo-created-cell">{{ p.created_at_label }}</td>
+                <td>
+                  {% if p.active %}
+                    <span class="status-badge paid">On</span>
+                  {% else %}
+                    <span class="status-badge unpaid">Off</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="admin-promo-home-badge admin-promo-home-badge--{{ p.homepage_status_key }}" title="{{ p.homepage_status_label }}">
+                    {{ p.homepage_status_label }}
+                  </span>
+                </td>
+                <td>
+                  <div class="admin-promo-actions">
+                    <a class="action-link" href="/dashboard/promotions/{{ p.id }}/edit">Edit</a>
+                    <form method="post" action="/dashboard/promotions/{{ p.id }}/toggle-active" class="inline-toggle-form">
+                      <button class="btn btn-ghost btn-sm" type="submit">
+                        {% if p.active %}Deactivate{% else %}Activate{% endif %}
+                      </button>
+                    </form>
+                    <form method="post" action="/dashboard/promotions/{{ p.id }}/delete" class="inline-toggle-form" onsubmit="return confirm('Delete this promotion permanently?');">
+                      <button class="btn btn-ghost btn-sm admin-promo-delete-btn" type="submit">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="admin-promo-empty-inner">
+        <h3 class="admin-promo-empty-title">No promotions yet</h3>
+        <p class="muted">Create one using the form — it can appear on the homepage when active and in date range.</p>
+      </div>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

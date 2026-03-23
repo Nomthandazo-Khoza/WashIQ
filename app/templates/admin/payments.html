@@ -1,13 +1,13 @@
 {% extends "admin/layout.html" %}
 {% block title %}Payments | Admin | WashIQ{% endblock %}
-{% block meta_description %}WashIQ admin payments area.{% endblock %}
+{% block meta_description %}WashIQ admin — payment history and revenue analytics.{% endblock %}
 
 {% block admin_main %}
 <header class="admin-main-header admin-main-header--compact">
   <div>
     <p class="eyebrow">Admin</p>
     <h1>Payments</h1>
-    <p class="muted">Payment analytics and history will live here.</p>
+    <p class="muted">Revenue, transaction counts, and full payment history with filters.</p>
   </div>
 
   <div class="admin-main-user">
@@ -23,10 +23,118 @@
   </div>
 </header>
 
+<section class="dashboard-metrics dashboard-metrics--payments" aria-label="Payment analytics">
+  <article class="card stat-card stat-card--teal">
+    <span>Total revenue</span>
+    <strong>R{{ payment_analytics.total_revenue_display }}</strong>
+    <span class="stat-card-hint">Sum of paid payment amounts</span>
+  </article>
+  <article class="card stat-card">
+    <span>Paid payments</span>
+    <strong>{{ payment_analytics.paid_payments }}</strong>
+    <span class="stat-card-hint">Status = paid</span>
+  </article>
+  <article class="card stat-card stat-card--accent">
+    <span>Pending payments</span>
+    <strong>{{ payment_analytics.pending_payments }}</strong>
+    <span class="stat-card-hint">Status = pending</span>
+  </article>
+  <article class="card stat-card">
+    <span>Total transactions</span>
+    <strong>{{ payment_analytics.total_transactions }}</strong>
+    <span class="stat-card-hint">All payment records</span>
+  </article>
+</section>
+
 <section class="section admin-page-section">
-  <article class="card">
-    <h2>Coming soon</h2>
-    <p class="muted">Payment analytics and payment history will be available in a later phase.</p>
+  <article class="card admin-payments-table-card">
+    <div class="admin-payments-card-head">
+      <div>
+        <h2>Payment history</h2>
+        <p class="muted small-muted admin-payments-lead">Customer-linked rows show booking service and date when available.</p>
+      </div>
+    </div>
+
+    <form class="admin-payments-filters" method="get" action="/dashboard/payments">
+      <div class="admin-payments-filter-group">
+        <label class="admin-payments-filter-label" for="pay-filter-status">Status</label>
+        <select id="pay-filter-status" class="input admin-payments-select" name="status">
+          <option value="all" {% if payments_status_filter == 'all' %}selected{% endif %}>All</option>
+          <option value="paid" {% if payments_status_filter == 'paid' %}selected{% endif %}>Paid</option>
+          <option value="pending" {% if payments_status_filter == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="failed" {% if payments_status_filter == 'failed' %}selected{% endif %}>Failed</option>
+        </select>
+      </div>
+      <div class="admin-payments-filter-group">
+        <label class="admin-payments-filter-label" for="pay-filter-method">Method</label>
+        <select id="pay-filter-method" class="input admin-payments-select" name="method">
+          <option value="all" {% if payments_method_filter == 'all' %}selected{% endif %}>All methods</option>
+          {% for key, label in payments_method_labels.items() %}
+            <option value="{{ key }}" {% if payments_method_filter == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="admin-payments-filter-actions">
+        <button class="btn btn-sm" type="submit">Apply filters</button>
+        {% if payments_filters_active %}
+          <a class="btn btn-sm btn-ghost" href="/dashboard/payments">Clear</a>
+        {% endif %}
+      </div>
+    </form>
+
+    {% if payment_rows and payment_rows|length > 0 %}
+      <div class="dashboard-table-wrap admin-payments-table-wrap">
+        <table class="dashboard-table admin-payments-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Booking / service</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Provider</th>
+              <th>Provider ref</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in payment_rows %}
+              <tr>
+                <td>{{ row.customer_name }}</td>
+                <td>
+                  <span class="admin-payments-booking-cell">{{ row.booking_service_display }}</span>
+                </td>
+                <td><strong>R{{ row.amount_display }}</strong></td>
+                <td>{{ row.method_label }}</td>
+                <td>
+                  <span class="status-badge {{ row.status_key }}">{{ row.status }}</span>
+                </td>
+                <td>{{ row.provider }}</td>
+                <td class="admin-payments-ref-cell"><span class="mono-ellipsis" title="{{ row.provider_reference }}">{{ row.provider_reference }}</span></td>
+                <td class="admin-payments-date-cell">{{ row.created_at_display }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="admin-payments-empty-inner">
+        {% if payments_has_any and payments_filters_active %}
+          <h3 class="admin-payments-empty-title">No payments match these filters</h3>
+          <p class="muted">Try clearing filters or choosing a different status or method.</p>
+          <p class="admin-payments-empty-actions">
+            <a class="btn btn-sm" href="/dashboard/payments">Clear filters</a>
+          </p>
+        {% elif payments_has_any %}
+          <h3 class="admin-payments-empty-title">No payments to show</h3>
+          <p class="muted">Payment records will appear here as customers complete checkout.</p>
+        {% else %}
+          <h3 class="admin-payments-empty-title">No payments yet</h3>
+          <p class="muted">When customers pay for bookings, transactions and revenue will show up here.</p>
+          <p class="muted small-muted">Tip: use the customer payment flow or mark bookings paid from the bookings table.</p>
+        {% endif %}
+      </div>
+    {% endif %}
   </article>
 </section>
 {% endblock %}

@@ -1,14 +1,17 @@
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Form, Query, Request, status
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.auth import auth_template_context, get_current_customer, is_admin_customer
 from app.database import get_db
 from app.models import Booking, Payment
+from app.routes.customer import customer_payment_nav_href
+from app.services.communication_service import dispatch_payment_confirmation
+from app.settings_helpers import receipt_footer_from_settings
 
 router = APIRouter()
 
@@ -90,10 +93,15 @@ def _payment_context(request: Request, db: Session, **kwargs):
         "status_badge": PAYMENT_STATUSES["pay_now"],
         "error_message": None,
         "payment_result": None,
+        "payment_confirmation_channels": None,
         **DEFAULT_CARD_DETAILS,
     }
     base.update(auth_template_context(request, db))
     base.update(kwargs)
+    cur = get_current_customer(request, db)
+    if cur and not is_admin_customer(cur):
+        base.setdefault("customer_section", "payment")
+        base["payment_nav_href"] = customer_payment_nav_href(db, cur.id)
     return base
 
 
@@ -148,6 +156,7 @@ def payment_page(
     predicted_status = _get_predicted_status(selected_timing)
 
     return templates.TemplateResponse(
+        request,
         "payment.html",
         _payment_context(
             request,
@@ -237,6 +246,7 @@ def process_payment(
         if missing:
             predicted_status = _get_predicted_status(payment_action)
             return templates.TemplateResponse(
+                request,
                 "payment.html",
                 _payment_context(
                     request,
@@ -269,6 +279,7 @@ def process_payment(
 
     payment = Payment(
         booking_id=booking.id if booking else None,
+        customer_id=current_customer.id,
         method=payment_method,
         amount=amount,
         status=payment_status,
@@ -283,7 +294,19 @@ def process_payment(
     db.commit()
     db.refresh(payment)
 
+    confirmation_channels = dispatch_payment_confirmation(
+        db,
+        customer_id=current_customer.id,
+        payment=payment,
+        booking=booking,
+        contact_email=current_customer.email,
+        contact_phone=current_customer.phone,
+        customer_name=current_customer.full_name,
+        item_label=item_name,
+    )
+
     return templates.TemplateResponse(
+        request,
         "payment.html",
         _payment_context(
             request,
@@ -298,7 +321,9 @@ def process_payment(
             payment_method_help=PAYMENT_METHOD_HELP.get(payment_method),
             selected_package=selected_package,
             selected_amount=amount,
+            payment_confirmation_channels=confirmation_channels,
             payment_result={
+                "payment_id": payment.id,
                 "item_name": item_name,
                 "amount": amount,
                 "timing": payment_action,
@@ -308,6 +333,64 @@ def process_payment(
                 "status": payment.status,
                 "provider": payment.provider,
                 "provider_reference": payment.provider_reference or "Pending confirmation",
+                "receipt_path": f"/receipt/{payment.id}",
             },
         ),
     )
+
+
+@router.get("/receipt/{payment_id}")
+def receipt_page(
+    payment_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    current = get_current_customer(request, db)
+    if not current:
+        return RedirectResponse(
+            url=f"/login?next=/receipt/{payment_id}",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    payment = (
+        db.query(Payment)
+        .options(
+            joinedload(Payment.booking).joinedload(Booking.customer),
+            joinedload(Payment.customer),
+        )
+        .filter(Payment.id == payment_id)
+        .first()
+    )
+    if not payment:
+        raise HTTPException(status_code=404, detail="Receipt not found")
+
+    admin = is_admin_customer(current)
+    allowed = admin
+    if not allowed:
+        if payment.customer_id and payment.customer_id == current.id:
+            allowed = True
+        elif payment.booking_id and payment.booking and payment.booking.customer_id == current.id:
+            allowed = True
+    if not allowed:
+        raise HTTPException(status_code=403, detail="You cannot view this receipt")
+
+    booking = payment.booking
+    cust_name = current.full_name
+    if booking and booking.customer:
+        cust_name = booking.customer.full_name
+    elif payment.customer:
+        cust_name = payment.customer.full_name
+
+    method_label = METHOD_LABELS.get(payment.method, payment.method)
+
+    context = {
+        "request": request,
+        "receipt_payment": payment,
+        "receipt_booking": booking,
+        "customer_display_name": cust_name,
+        "method_label": method_label,
+        "amount_display": int(round(float(payment.amount or 0))),
+        "receipt_footer_note": receipt_footer_from_settings(db),
+    }
+    context.update(auth_template_context(request, db))
+    return templates.TemplateResponse(request, "receipt.html", context)

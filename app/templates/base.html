@@ -28,8 +28,9 @@
           {% if current_customer %}
             {% if current_customer.is_admin %}
               <a href="/dashboard">Dashboard</a>
-            {% endif %}
-            {% if not current_customer.is_admin %}
+            {% else %}
+              <a href="/customer">Dashboard</a>
+              <a href="/feedback">Feedback</a>
               <a href="/profile">Profile</a>
             {% endif %}
           {% endif %}
@@ -52,11 +53,13 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer {% block footer_modifier %}{% endblock %}">
+    {% block site_footer %}
     <div class="container footer-content">
       <p>© {{ 2026 }} WashIQ. Car Wash and Secure Parking.</p>
       <a href="/contact">Get in touch</a>
     </div>
+    {% endblock %}
   </footer>
 </body>
 </html>

@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from app.auth import auth_template_context, get_current_customer, is_admin_customer
 from app.database import get_db
 from app.models import Booking
+from app.routes.customer import attach_customer_sidebar_nav
+from app.services.communication_service import dispatch_booking_confirmation
 
 router = APIRouter()
 
@@ -63,6 +65,7 @@ def _booking_context(request: Request, **kwargs):
         "error_message": None,
         "field_errors": {},
         "success_booking": None,
+        "booking_confirmation_channels": None,
         "service_prices": SERVICE_PRICES,
         "time_slots": TIME_SLOTS,
         "selected_price": 0,
@@ -109,7 +112,8 @@ def booking_page(
         context["selected_price"] = SERVICE_PRICES[selected_service]
 
     context.update(auth_template_context(request, db))
-    return templates.TemplateResponse("booking.html", context)
+    attach_customer_sidebar_nav(db, request, context, "booking")
+    return templates.TemplateResponse(request, "booking.html", context)
 
 
 @router.post("/booking")
@@ -195,12 +199,14 @@ def submit_booking(
             error_message="Please review the highlighted fields and try again.",
         )
         context.update(auth_template_context(request, db))
-        return templates.TemplateResponse(
-            "booking.html",
-            context,
-        )
+        attach_customer_sidebar_nav(db, request, context, "booking")
+        return templates.TemplateResponse(request, "booking.html", context)
 
     current_customer = get_current_customer(request, db)
+
+    collection_status = (
+        "pending" if form_data["service"] == "Overnight Parking" else "not_applicable"
+    )
 
     booking = Booking(
         customer_id=current_customer.id if current_customer else None,
@@ -213,12 +219,22 @@ def submit_booking(
         estimated_price=selected_price,
         payment_status="unpaid",
         status="pending",
+        collection_status=collection_status,
     )
     db.add(booking)
     db.commit()
     db.refresh(booking)
 
     display_name = current_customer.full_name if current_customer else form_data["full_name"]
+
+    confirmation_channels = dispatch_booking_confirmation(
+        db,
+        customer_id=current_customer.id if current_customer else None,
+        booking=booking,
+        contact_email=form_data["email"],
+        contact_phone=form_data["phone"],
+        customer_name=display_name,
+    )
 
     context = _booking_context(
         request,
@@ -231,7 +247,10 @@ def submit_booking(
             "registration_number": booking.registration_number,
             "car_model": booking.car_model,
             "estimated_price": selected_price,
+            "status": booking.status,
         },
+        booking_confirmation_channels=confirmation_channels,
     )
     context.update(auth_template_context(request, db))
-    return templates.TemplateResponse("booking.html", context)
+    attach_customer_sidebar_nav(db, request, context, "booking")
+    return templates.TemplateResponse(request, "booking.html", context)

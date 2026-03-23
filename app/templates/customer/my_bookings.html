@@ -1,0 +1,58 @@
+{% extends "customer/layout.html" %}
+{% block title %}My Bookings | WashIQ{% endblock %}
+{% block meta_description %}View and manage your WashIQ bookings.{% endblock %}
+
+{% block customer_main %}
+  <section class="customer-page-header card">
+    <p class="eyebrow">Bookings</p>
+    <h1>My Bookings</h1>
+    <p class="muted">All your scheduled services, payment status, and quick actions in one place.</p>
+  </section>
+
+  <section class="card" style="margin-top: 1rem;">
+    <h2 style="margin-top: 0;">Your bookings</h2>
+    {% if bookings %}
+      <div class="customer-bookings-list">
+        {% for booking in bookings %}
+          <div class="customer-booking-item">
+            <div class="customer-booking-top">
+              <div>
+                <p style="margin:0; font-weight:800;">
+                  #{{ booking.id }} - {{ booking.service }}
+                </p>
+                <p class="muted" style="margin:0.2rem 0 0;">
+                  {{ booking.booking_date }} at {{ booking.time_slot }}
+                </p>
+                <p class="muted" style="margin:0.2rem 0 0;">
+                  {{ booking.car_model }} - {{ booking.registration_number }}
+                </p>
+              </div>
+
+              <div class="customer-badges" aria-label="Booking badges">
+                <span class="status-badge {{ (booking.payment_status or '')|lower }}">
+                  {{ booking.payment_status }}
+                </span>
+                <span class="status-badge {{ (booking.status or '')|lower }}">
+                  {{ booking.status }}
+                </span>
+              </div>
+            </div>
+
+            <div class="customer-booking-actions">
+              {% if booking.payment_status and (booking.payment_status|lower) != 'paid' %}
+                <a class="btn btn-ghost" href="/payment?booking_id={{ booking.id }}">Pay for this booking</a>
+              {% endif %}
+              {% if booking_receipts.get(booking.id) %}
+                <a class="btn btn-ghost" href="/receipt/{{ booking_receipts[booking.id] }}">View receipt</a>
+              {% endif %}
+              <a class="btn" href="/booking?service={{ booking.service|replace(' ','%20') }}">Book Again</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">You have no bookings yet.</p>
+      <a class="btn" href="/booking">Make Your First Booking</a>
+    {% endif %}
+  </section>
+{% endblock %}

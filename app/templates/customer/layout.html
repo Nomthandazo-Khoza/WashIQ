@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="customer-dashboard-shell">
+  {% include "customer/_sidebar.html" %}
+  <main class="customer-main">
+    {% block customer_main %}{% endblock %}
+  </main>
+</section>
+{% endblock %}

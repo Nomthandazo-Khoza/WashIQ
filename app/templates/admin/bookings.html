@@ -26,6 +26,7 @@
 <section class="section admin-page-section">
   <article class="card dashboard-table-card">
     <h2>All bookings</h2>
+    {% set admin_bookings_return = '/dashboard/bookings' %}
     {% include "admin/bookings_table.html" %}
   </article>
 </section>

@@ -1,13 +1,13 @@
 {% extends "admin/layout.html" %}
 {% block title %}Settings | Admin | WashIQ{% endblock %}
-{% block meta_description %}WashIQ admin settings.{% endblock %}
+{% block meta_description %}WashIQ operational settings.{% endblock %}
 
 {% block admin_main %}
 <header class="admin-main-header admin-main-header--compact">
   <div>
-    <p class="eyebrow">Admin</p>
+    <p class="eyebrow">Configuration</p>
     <h1>Settings</h1>
-    <p class="muted">Configure your WashIQ admin experience.</p>
+    <p class="muted">Business details and receipt copy. Public contact pages still use <code>contact_info.py</code> unless you wire them to this data later.</p>
   </div>
 
   <div class="admin-main-user">
@@ -16,17 +16,45 @@
         Signed in as <strong>{{ current_customer.full_name }}</strong>
       </div>
     {% endif %}
-
     <form method="post" action="/logout" class="logout-form">
       <button class="btn btn-ghost btn-sm" type="submit">Logout</button>
     </form>
   </div>
 </header>
 
+{% if settings_saved %}
+  <p class="alert success promotions-flash" role="status">Settings saved.</p>
+{% endif %}
+
 <section class="section admin-page-section">
-  <article class="card">
-    <h2>Coming soon</h2>
-    <p class="muted">Admin settings will be available in a later phase.</p>
+  <article class="card admin-settings-card">
+    <h2>Business &amp; contact</h2>
+    <form class="booking-form admin-settings-form" method="post" action="/dashboard/settings">
+      <label for="set-business">Business name</label>
+      <input id="set-business" name="business_name" type="text" maxlength="200" value="{{ settings_business_name }}" required>
+
+      <label for="set-email">Support email</label>
+      <input id="set-email" name="support_email" type="email" maxlength="200" value="{{ settings_support_email }}" required>
+
+      <label for="set-phone">Contact number (display)</label>
+      <input id="set-phone" name="contact_phone" type="text" maxlength="120" value="{{ settings_contact_phone }}">
+
+      <label for="set-wa">WhatsApp number (digits, country code, no +)</label>
+      <input id="set-wa" name="whatsapp_e164" type="text" maxlength="40" value="{{ settings_whatsapp_e164 }}" placeholder="27310000000">
+
+      <label for="set-address">Address <span class="muted">(multi-line)</span></label>
+      <textarea id="set-address" name="address_text" rows="4" maxlength="4000">{{ settings_address_text }}</textarea>
+
+      <label for="set-hours">Operating hours <span class="muted">(multi-line)</span></label>
+      <textarea id="set-hours" name="operating_hours_text" rows="5" maxlength="4000">{{ settings_operating_hours_text }}</textarea>
+
+      <h3 class="admin-settings-subheading">Receipts</h3>
+      <label for="set-receipt-footer">Receipt footer note</label>
+      <textarea id="set-receipt-footer" name="receipt_footer_note" rows="2" maxlength="2000">{{ settings_receipt_footer_note }}</textarea>
+      <p class="muted small-muted">Shown on digital receipts (e.g. <code>/receipt/&lt;id&gt;</code>).</p>
+
+      <button class="btn" type="submit">Save settings</button>
+    </form>
   </article>
 </section>
 {% endblock %}

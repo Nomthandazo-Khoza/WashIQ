@@ -1,0 +1,161 @@
+{% extends "admin/layout.html" %}
+{% block title %}{{ detail_customer.full_name }} | Customers | Admin | WashIQ{% endblock %}
+{% block meta_description %}WashIQ admin — customer profile, bookings, and payments.{% endblock %}
+
+{% block admin_main %}
+<header class="admin-main-header admin-main-header--compact">
+  <div>
+    <p class="eyebrow">Admin · Customers</p>
+    <h1>{{ detail_customer.full_name }}</h1>
+    <p class="muted">
+      <a class="action-link" href="/dashboard/customers">&larr; Back to directory</a>
+    </p>
+  </div>
+
+  <div class="admin-main-user">
+    {% if current_customer %}
+      <div class="muted small-muted">
+        Signed in as <strong>{{ current_customer.full_name }}</strong>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/logout" class="logout-form">
+      <button class="btn btn-ghost btn-sm" type="submit">Logout</button>
+    </form>
+  </div>
+</header>
+
+<section class="dashboard-metrics dashboard-metrics--customer-detail" aria-label="Customer summary">
+  <article class="card stat-card">
+    <span>Total bookings</span>
+    <strong>{{ detail_total_bookings }}</strong>
+  </article>
+  <article class="card stat-card stat-card--accent">
+    <span>Paid bookings</span>
+    <strong>{{ detail_paid_bookings }}</strong>
+  </article>
+  <article class="card stat-card stat-card--teal">
+    <span>Total spend</span>
+    <strong>R{{ detail_total_spend_display }}</strong>
+    <span class="stat-card-hint">Paid payments</span>
+  </article>
+  <article class="card stat-card">
+    <span>Last booking date</span>
+    <strong class="admin-detail-stat-strong">{{ detail_last_booking_display }}</strong>
+  </article>
+</section>
+
+<section class="section admin-page-section admin-customer-detail-grid">
+  <article class="card admin-customer-profile-card">
+    <h2>Profile</h2>
+    {% if detail_customer.is_admin %}
+      <p><span class="admin-inline-badge admin-inline-badge--wide">Administrator</span></p>
+    {% endif %}
+    <dl class="admin-detail-dl">
+      <div>
+        <dt>Name</dt>
+        <dd>{{ detail_customer.full_name }}</dd>
+      </div>
+      <div>
+        <dt>Email</dt>
+        <dd><a class="text-link" href="mailto:{{ detail_customer.email }}">{{ detail_customer.email }}</a></dd>
+      </div>
+      <div>
+        <dt>Phone</dt>
+        <dd><a class="text-link" href="tel:{{ detail_customer.phone }}">{{ detail_customer.phone }}</a></dd>
+      </div>
+      <div>
+        <dt>Loyalty points</dt>
+        <dd class="muted">{{ detail_customer.loyalty_display }} <span class="small-muted">(not tracked in this build)</span></dd>
+      </div>
+    </dl>
+  </article>
+
+  <article class="card admin-customer-activity-card">
+    <h2>Recent activity</h2>
+    {% if detail_recent_activity and detail_recent_activity|length > 0 %}
+      <ul class="admin-activity-list">
+        {% for a in detail_recent_activity %}
+          <li class="admin-activity-item">
+            <span class="admin-activity-time">{{ a.at_display }}</span>
+            <span class="admin-activity-badge admin-activity-badge--{{ a.label|lower }}">{{ a.label }}</span>
+            <span class="admin-activity-detail">{{ a.detail }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No bookings or payments recorded for this customer yet.</p>
+    {% endif %}
+  </article>
+</section>
+
+<section class="section admin-page-section" id="bookings">
+  <article class="card">
+    <h2>Booking history</h2>
+    {% if detail_booking_rows and detail_booking_rows|length > 0 %}
+      <div class="dashboard-table-wrap">
+        <table class="dashboard-table admin-detail-table">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Vehicle</th>
+              <th>Est.</th>
+              <th>Payment</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in detail_booking_rows %}
+              <tr>
+                <td>{{ b.service }}</td>
+                <td>{{ b.booking_date }}</td>
+                <td>{{ b.time_slot }}</td>
+                <td class="admin-detail-vehicle-cell">{{ b.vehicle }}</td>
+                <td>R{{ b.estimated_display }}</td>
+                <td><span class="status-badge {{ b.payment_status_key }}">{{ b.payment_status }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">No bookings linked to this customer.</p>
+    {% endif %}
+  </article>
+</section>
+
+<section class="section admin-page-section" id="payments">
+  <article class="card">
+    <h2>Payment history</h2>
+    {% if detail_payment_rows and detail_payment_rows|length > 0 %}
+      <div class="dashboard-table-wrap">
+        <table class="dashboard-table admin-detail-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Provider</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in detail_payment_rows %}
+              <tr>
+                <td class="admin-payments-date-cell">{{ p.created_at_display }}</td>
+                <td><strong>R{{ p.amount_display }}</strong></td>
+                <td>{{ p.method_label }}</td>
+                <td><span class="status-badge {{ p.status_key }}">{{ p.status }}</span></td>
+                <td>{{ p.provider }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">No payment records for this customer.</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

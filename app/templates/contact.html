@@ -1,62 +1,113 @@
 {% extends "base.html" %}
 {% block title %}Contact WashIQ{% endblock %}
-{% block meta_description %}Contact WashIQ in Durban for car wash bookings, secure parking information, and service support.{% endblock %}
+{% block meta_description %}Contact WashIQ in Durban for car wash bookings, secure parking, directions, and service support. Phone, WhatsApp, hours, and map.{% endblock %}
 
 {% block content %}
-<section class="card page-header">
+<section class="card page-header contact-page-header">
   <p class="eyebrow">Contact WashIQ</p>
-  <h1>Let's get your vehicle service sorted</h1>
-  <p class="muted">
-    Reach out for service questions, booking support, or business inquiries.
+  <h1>We’re here to help</h1>
+  <p class="muted contact-intro">
+    Questions about booking, our wash bay, or secure parking? Reach us by phone, WhatsApp, or the form below —
+    we usually reply within one business day.
   </p>
 </section>
 
-<section class="section grid contact-layout">
-  <article class="card">
-    <h2>Contact Information</h2>
-    <div class="contact-list">
-      <p><strong>Location:</strong> Durban, South Africa</p>
-      <p><strong>Phone:</strong> +27 00 000 0000</p>
-      <p><strong>Email:</strong> hello@washiq.co.za</p>
-      <p><strong>Operating Hours:</strong> Mon-Sat, 7:00 AM - 7:00 PM</p>
+<section class="section contact-phase-a">
+  <div class="contact-two-col">
+    <article class="card contact-info-card">
+      <h2 class="contact-card-title">Visit &amp; call</h2>
+      <p class="muted contact-card-lead">We’re based in the Durban area — use the map for directions while we finalise our exact bay location.</p>
+
+      <div class="contact-info-rows">
+        <div class="contact-info-row">
+          <span class="contact-info-label">Address</span>
+          <div class="contact-info-value">
+            {% for line in contact_address_lines %}
+              <span class="contact-address-line">{{ line }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="contact-info-row">
+          <span class="contact-info-label">Phone</span>
+          <div class="contact-info-value">
+            <a class="contact-link" href="{{ contact_phone_tel }}">{{ contact_phone_display }}</a>
+          </div>
+        </div>
+        <div class="contact-info-row">
+          <span class="contact-info-label">Email</span>
+          <div class="contact-info-value">
+            <a class="contact-link" href="mailto:{{ contact_email }}">{{ contact_email }}</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-hours-block">
+        <h3 class="contact-subheading">Operating hours</h3>
+        <ul class="contact-hours-list" role="list">
+          {% for row in contact_hours %}
+            <li>
+              <span class="contact-hours-day">{{ row.label }}</span>
+              <span class="contact-hours-time">{{ row.value }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <a class="btn whatsapp-btn contact-whatsapp-cta" href="{{ contact_whatsapp_url }}" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp with WashIQ">
+        Chat on WhatsApp
+      </a>
+    </article>
+
+    <div class="contact-right-stack">
+      <article class="card contact-map-card">
+        <h2 class="contact-card-title">Directions</h2>
+        <p class="muted contact-map-caption">Open in Google Maps for turn-by-turn directions to our Durban area.</p>
+        <div class="contact-map-embed">
+          <iframe
+            src="{{ contact_map_embed_url }}"
+            title="WashIQ location on Google Maps"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <p class="contact-map-foot muted">Map shows the Durban area until your exact pin is set.</p>
+      </article>
+
+      <article class="card contact-form-card">
+        <h2 class="contact-card-title">Send a message</h2>
+        <p class="muted">Tell us how we can help. This form is for enquiries only — for bookings, use <a href="/booking">Book a wash</a>.</p>
+
+        {% if form_success %}
+          <p class="alert success contact-form-alert" role="status">Thanks — we’ve received your message and will get back to you soon.</p>
+        {% endif %}
+        {% if form_error %}
+          <p class="alert error contact-form-alert" role="alert">{{ form_error }}</p>
+        {% endif %}
+
+        <form class="booking-form contact-form" method="post" action="/contact">
+          <label for="contact-name">Name</label>
+          <input id="contact-name" name="name" type="text" autocomplete="name" required value="{{ form_name }}">
+
+          <label for="contact-phone">Phone</label>
+          <input id="contact-phone" name="phone" type="tel" autocomplete="tel" required value="{{ form_phone }}">
+
+          <label for="contact-email">Email</label>
+          <input id="contact-email" name="email" type="email" autocomplete="email" required value="{{ form_email }}">
+
+          <label for="contact-message">Message</label>
+          <textarea id="contact-message" name="message" rows="5" required>{{ form_message }}</textarea>
+
+          <button class="btn contact-submit-btn" type="submit">Send message</button>
+        </form>
+      </article>
     </div>
-    <a class="btn whatsapp-btn" href="#" aria-label="Chat on WhatsApp">Chat on WhatsApp</a>
-  </article>
-
-  <article class="card map-card">
-    <h2>Find Us</h2>
-    <div class="map-placeholder">
-      <p>Map Placeholder</p>
-      <span>Embed map here in a future phase</span>
-    </div>
-  </article>
-</section>
-
-<section class="section">
-  <article class="card">
-    <h2>Send Us a Message</h2>
-    <p class="muted">Our team usually responds within one business day.</p>
-    <form class="booking-form contact-form" method="post" action="#">
-      <label for="name">Name</label>
-      <input id="name" name="name" type="text" required>
-
-      <label for="phone">Phone</label>
-      <input id="phone" name="phone" type="text" required>
-
-      <label for="email">Email</label>
-      <input id="email" name="email" type="email" required>
-
-      <label for="message">Message</label>
-      <textarea id="message" name="message" rows="5" required></textarea>
-
-      <button class="btn" type="submit">Send Message</button>
-    </form>
-  </article>
+  </div>
 </section>
 
 <section class="section">
   <article class="card local-seo-block">
-    <p class="eyebrow">Business Enquiries</p>
+    <p class="eyebrow">Business enquiries</p>
     <h2>Need fleet or recurring service support?</h2>
     <p>
       If you manage multiple vehicles or need repeat bookings, contact us for tailored scheduling

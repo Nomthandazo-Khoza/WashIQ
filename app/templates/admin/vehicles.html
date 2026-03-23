@@ -5,9 +5,9 @@
 {% block admin_main %}
 <header class="admin-main-header admin-main-header--compact">
   <div>
-    <p class="eyebrow">Admin</p>
+    <p class="eyebrow">Fleet</p>
     <h1>Vehicles</h1>
-    <p class="muted">Vehicle records tied to bookings.</p>
+    <p class="muted">Derived from bookings: registration, model, and linked customer.</p>
   </div>
 
   <div class="admin-main-user">
@@ -23,10 +23,70 @@
   </div>
 </header>
 
+<section class="dashboard-metrics dashboard-metrics--vehicles" aria-label="Vehicle summary">
+  <article class="card stat-card">
+    <span>Total vehicles</span>
+    <strong>{{ vehicle_metrics.total_vehicles }}</strong>
+    <span class="stat-card-hint">Unique reg, model, customer</span>
+  </article>
+  <article class="card stat-card stat-card--accent">
+    <span>Active (90 days)</span>
+    <strong>{{ vehicle_metrics.active_90 }}</strong>
+    <span class="stat-card-hint">Last booking in window</span>
+  </article>
+  <article class="card stat-card stat-card--teal">
+    <span>Recently booked</span>
+    <strong>{{ vehicle_metrics.recent_30 }}</strong>
+    <span class="stat-card-hint">Last 30 days</span>
+  </article>
+</section>
+
 <section class="section admin-page-section">
   <article class="card">
-    <h2>Coming soon</h2>
-    <p class="muted">Vehicle list and vehicle analytics will be available in a later phase.</p>
+    <h2>Vehicle directory</h2>
+    <form class="admin-vehicles-filters" method="get" action="/dashboard/vehicles">
+      <label class="admin-feedback-filter-label" for="veh-search">Search</label>
+      <input id="veh-search" class="input admin-vehicles-search" type="search" name="search" value="{{ vehicles_search }}" placeholder="Registration, model, or customer" autocomplete="off">
+      <button class="btn btn-sm" type="submit">Search</button>
+      {% if vehicles_filters_active %}
+        <a class="btn btn-sm btn-ghost" href="/dashboard/vehicles">Clear</a>
+      {% endif %}
+    </form>
+    {% if vehicle_rows %}
+      <div class="dashboard-table-wrap admin-vehicles-table-wrap">
+        <table class="dashboard-table admin-vehicles-table">
+          <thead>
+            <tr>
+              <th>Registration</th>
+              <th>Model</th>
+              <th>Customer</th>
+              <th>Bookings</th>
+              <th>Last booking</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for v in vehicle_rows %}
+              <tr>
+                <td><strong>{{ v.registration_number }}</strong></td>
+                <td>{{ v.car_model }}</td>
+                <td>{{ v.customer_name }}</td>
+                <td>{{ v.booking_count }}</td>
+                <td class="small-muted">{{ v.last_booking_display }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="admin-empty-card">
+        {% if vehicles_filters_active %}
+          <p class="muted">No vehicles match your search.</p>
+          <p><a class="action-link" href="/dashboard/vehicles">Clear search</a></p>
+        {% else %}
+          <p class="muted">No booking data yet.</p>
+        {% endif %}
+      </div>
+    {% endif %}
   </article>
 </section>
 {% endblock %}

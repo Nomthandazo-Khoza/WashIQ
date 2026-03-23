@@ -6,6 +6,7 @@
           <th>Customer</th>
           <th>Vehicle</th>
           <th>Service</th>
+          <th>Collection</th>
           <th>Date</th>
           <th>Time</th>
           <th>Amount</th>
@@ -20,6 +21,13 @@
             <td>{{ booking.customer_name }}</td>
             <td>{{ booking.vehicle }}</td>
             <td>{{ booking.service }}</td>
+            <td>
+              {% if booking.service == 'Overnight Parking' %}
+                <span class="collection-badge collection-badge--{{ booking.collection_status|replace('_','-') }}">{{ booking.collection_status|replace('_',' ') }}</span>
+              {% else %}
+                <span class="muted small-muted">—</span>
+              {% endif %}
+            </td>
             <td>{{ booking.booking_date }}</td>
             <td>{{ booking.time_slot }}</td>
             <td>R{{ booking.amount_display }}</td>
@@ -30,6 +38,12 @@
                 {% if booking.payment_status_key != 'paid' %}
                   <form method="post" action="/dashboard/booking/{{ booking.id }}/mark-paid" class="mark-paid-form">
                     <button class="btn btn-sm" type="submit">Mark Paid</button>
+                  </form>
+                {% endif %}
+                {% if booking.service == 'Overnight Parking' and (booking.collection_status|lower) != 'collected' %}
+                  <form method="post" action="/dashboard/booking/{{ booking.id }}/mark-collected" class="mark-collected-form">
+                    <input type="hidden" name="return_to" value="{{ admin_bookings_return|default('/dashboard/bookings') }}">
+                    <button class="btn btn-sm btn-ghost mark-collected-btn" type="submit" title="Vehicle collected — clears overnight alert">Mark collected</button>
                   </form>
                 {% endif %}
               </div>

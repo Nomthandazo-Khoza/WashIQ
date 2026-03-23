@@ -1,0 +1,74 @@
+{# Expects: customer_section (dashboard|bookings|booking|payment|profile|feedback), payment_nav_href #}
+<aside class="customer-sidebar card">
+  <div class="customer-sidebar-brand">
+    <p class="eyebrow">Customer Portal</p>
+    <strong class="customer-sidebar-title">WashIQ</strong>
+    <span class="customer-sidebar-subtitle muted">Manage bookings & services</span>
+  </div>
+
+  <nav class="customer-side-nav" aria-label="Customer navigation">
+    <a class="customer-nav-item{% if customer_section == 'dashboard' %} active{% endif %}" href="/customer">
+      <span class="customer-nav-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 12c2.761 0 5-2.239 5-5S14.761 2 12 2 7 4.239 7 7s2.239 5 5 5Z" stroke="currentColor" stroke-width="2"/>
+          <path d="M4 22c1.8-4.5 5-7 8-7s6.2 2.5 8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      Dashboard
+    </a>
+
+    <a class="customer-nav-item{% if customer_section == 'bookings' %} active{% endif %}" href="/my-bookings">
+      <span class="customer-nav-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 7h10M8 12h10M8 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M4 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </span>
+      My Bookings
+    </a>
+
+    <a class="customer-nav-item{% if customer_section == 'feedback' %} active{% endif %}" href="/feedback">
+      <span class="customer-nav-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6L12 2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      Feedback
+    </a>
+
+    <a class="customer-nav-item{% if customer_section == 'booking' %} active{% endif %}" href="/booking">
+      <span class="customer-nav-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 7V3m8 4V3M4 9h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M6 5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </span>
+      Book a Service
+    </a>
+
+    <a class="customer-nav-item{% if customer_section == 'payment' %} active{% endif %}" href="{{ payment_nav_href }}">
+      <span class="customer-nav-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 1v22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>
+      Payments
+    </a>
+
+    <a class="customer-nav-item{% if customer_section == 'profile' %} active{% endif %}" href="/profile">
+      <span class="customer-nav-icon" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      Profile
+    </a>
+  </nav>
+
+  <div class="customer-sidebar-footer">
+    <form method="post" action="/logout" class="customer-sidebar-logout">
+      <button class="btn btn-ghost" type="submit">Logout</button>
+    </form>
+  </div>
+</aside>

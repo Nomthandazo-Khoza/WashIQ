@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Receipt #{{ receipt_payment.id }} | WashIQ{% endblock %}
+{% block meta_description %}WashIQ payment receipt.{% endblock %}
+
+{% block content %}
+<div class="receipt-page container">
+  <div class="receipt-actions no-print">
+    <a class="btn btn-ghost" href="javascript:window.print()">Print receipt</a>
+    {% if current_customer and current_customer.is_admin %}
+      <a class="btn btn-ghost" href="/dashboard">Admin</a>
+    {% elif current_customer %}
+      <a class="btn btn-ghost" href="/customer">Dashboard</a>
+    {% endif %}
+    <a class="btn" href="/payment">Payments</a>
+  </div>
+
+  <article class="card receipt-card" id="receipt-print-area">
+    <header class="receipt-header">
+      <div>
+        <p class="eyebrow">Digital receipt</p>
+        <h1 class="receipt-title">WashIQ</h1>
+        <p class="muted receipt-sub">Car wash and secure parking</p>
+      </div>
+      <div class="receipt-meta-block">
+        <p class="receipt-meta-label">Receipt #</p>
+        <p class="receipt-meta-value">{{ receipt_payment.id }}</p>
+      </div>
+    </header>
+
+    <div class="receipt-body">
+      <section class="receipt-section">
+        <h2 class="receipt-section-title">Payment</h2>
+        <dl class="receipt-dl">
+          <div><dt>Customer</dt><dd>{{ customer_display_name }}</dd></div>
+          <div><dt>Amount</dt><dd class="receipt-amount">R{{ amount_display }}</dd></div>
+          <div><dt>Method</dt><dd>{{ method_label }}</dd></div>
+          <div><dt>Status</dt><dd><span class="status-badge {{ receipt_payment.status }}">{{ receipt_payment.status }}</span></dd></div>
+          <div><dt>Provider</dt><dd>{{ receipt_payment.provider }}</dd></div>
+          <div><dt>Reference</dt><dd>{{ receipt_payment.provider_reference or "—" }}</dd></div>
+          <div><dt>Date</dt><dd>{{ receipt_payment.created_at }}</dd></div>
+        </dl>
+      </section>
+
+      {% if receipt_booking %}
+        <section class="receipt-section">
+          <h2 class="receipt-section-title">Linked booking</h2>
+          <dl class="receipt-dl">
+            <div><dt>Booking ID</dt><dd>#{{ receipt_booking.id }}</dd></div>
+            <div><dt>Service</dt><dd>{{ receipt_booking.service }}</dd></div>
+            <div><dt>Date and time</dt><dd>{{ receipt_booking.booking_date }} at {{ receipt_booking.time_slot }}</dd></div>
+            <div><dt>Vehicle</dt><dd>{{ receipt_booking.car_model }} — {{ receipt_booking.registration_number }}</dd></div>
+          </dl>
+        </section>
+      {% else %}
+        <section class="receipt-section">
+          <p class="muted">No booking linked to this payment (for example, a package purchase).</p>
+        </section>
+      {% endif %}
+    </div>
+
+    <footer class="receipt-footer">
+      <p>{{ receipt_footer_note }}</p>
+      <p class="muted small-muted">This document is your record of payment. For support, use Contact on our website.</p>
+    </footer>
+  </article>
+</div>
+{% endblock %}

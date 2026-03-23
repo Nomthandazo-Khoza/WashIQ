@@ -4,70 +4,7 @@
 
 {% block content %}
 <section class="customer-dashboard-shell">
-  <aside class="customer-sidebar card">
-    <div class="customer-sidebar-brand">
-      <p class="eyebrow">Customer Portal</p>
-      <strong class="customer-sidebar-title">WashIQ</strong>
-      <span class="customer-sidebar-subtitle muted">Manage bookings & services</span>
-    </div>
-
-    <nav class="customer-side-nav" aria-label="Customer navigation">
-      <a class="customer-nav-item" href="/profile#dashboard-overview">
-        <span class="customer-nav-icon" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 12c2.761 0 5-2.239 5-5S14.761 2 12 2 7 4.239 7 7s2.239 5 5 5Z" stroke="currentColor" stroke-width="2"/>
-            <path d="M4 22c1.8-4.5 5-7 8-7s6.2 2.5 8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </span>
-        Dashboard
-      </a>
-
-      <a class="customer-nav-item" href="/profile#my-bookings">
-        <span class="customer-nav-icon" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 7h10M8 12h10M8 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M4 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </span>
-        My Bookings
-      </a>
-
-      <a class="customer-nav-item" href="/booking">
-        <span class="customer-nav-icon" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 7V3m8 4V3M4 9h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M6 5h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </span>
-        Book a Service
-      </a>
-
-      <a class="customer-nav-item active" href="/payment">
-        <span class="customer-nav-icon" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 1v22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </span>
-        Payments
-      </a>
-
-      <a class="customer-nav-item" href="/profile#customer-details">
-        <span class="customer-nav-icon" aria-hidden="true">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </span>
-        Profile
-      </a>
-    </nav>
-
-    <div class="customer-sidebar-footer">
-      <form method="post" action="/logout" class="customer-sidebar-logout">
-        <button class="btn btn-ghost" type="submit">Logout</button>
-      </form>
-    </div>
-  </aside>
+  {% include "customer/_sidebar.html" %}
 
   <main class="customer-main">
     <section class="payment-header card">
@@ -77,11 +14,13 @@
     </section>
 
 {% if payment_result %}
-  <section class="card payment-success">
+  <section class="card payment-success flow-success-card">
     <p class="eyebrow">Payment Confirmation</p>
     <h2>Payment request recorded successfully</h2>
+    <p class="muted">Your digital receipt is ready. We also sent a payment summary by email and SMS when possible.</p>
 
     <div class="success-grid">
+      <div><span>Payment ID</span><strong>#{{ payment_result.payment_id }}</strong></div>
       <div><span>Item</span><strong>{{ payment_result.item_name }}</strong></div>
       <div><span>Amount</span><strong>R{{ payment_result.amount|int }}</strong></div>
       <div><span>Timing</span><strong>{{ payment_result.timing_label }}</strong></div>
@@ -91,9 +30,25 @@
       <div><span>Reference</span><strong>{{ payment_result.provider_reference }}</strong></div>
     </div>
 
-    <div class="hero-actions">
-      <a class="btn" href="/profile#dashboard-overview">Back to Dashboard</a>
-      <a class="btn btn-ghost" href="/profile#customer-details">Go to Profile</a>
+    {% if payment_confirmation_channels %}
+      <div class="confirmation-notice card confirmation-notice--inline">
+        <p class="confirmation-notice-title">Receipt and notifications</p>
+        <ul class="confirmation-channel-list">
+          {% for ch in payment_confirmation_channels %}
+            <li>
+              <span class="comm-channel comm-channel--{{ ch.channel }}">{{ ch.channel|upper }}</span>
+              <span class="confirmation-channel-status status-{{ ch.status }}">{{ ch.status }}</span>
+              {% if ch.detail %}<span class="muted small-muted">{{ ch.detail }}</span>{% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="hero-actions payment-success-actions">
+      <a class="btn" href="{{ payment_result.receipt_path }}">View receipt</a>
+      <a class="btn btn-ghost" href="/customer">Back to Dashboard</a>
+      <a class="btn btn-ghost" href="/profile">Go to Profile</a>
       <a class="btn btn-ghost" href="/payment">Make Another Payment</a>
     </div>
   </section>

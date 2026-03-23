@@ -1,0 +1,80 @@
+{% extends "customer/layout.html" %}
+{% block title %}Dashboard | WashIQ{% endblock %}
+{% block meta_description %}Your WashIQ customer dashboard.{% endblock %}
+
+{% block customer_main %}
+  <section class="card customer-hero">
+    <p class="eyebrow">Welcome</p>
+    <h1 class="customer-hero-title">Hi {{ current_customer.full_name }}</h1>
+    <p class="muted">Your WashIQ dashboard, quick stats, and your next service.</p>
+
+    <div class="customer-subtle-metrics">
+      <article class="card stat-card" style="padding:1.1rem;">
+        <span>Total bookings</span>
+        <strong>{{ total_bookings }}</strong>
+      </article>
+      <article class="card stat-card" style="padding:1.1rem;">
+        <span>Paid</span>
+        <strong>{{ paid_bookings }}</strong>
+      </article>
+      <article class="card stat-card" style="padding:1.1rem;">
+        <span>Pending</span>
+        <strong>{{ pending_bookings }}</strong>
+      </article>
+    </div>
+
+    <div class="hero-actions" style="margin-top:1rem;">
+      <a class="btn" href="/booking">Book a Service</a>
+      <a class="btn btn-ghost" href="/my-bookings">View all bookings</a>
+      <a class="btn btn-ghost" href="/feedback">Leave feedback</a>
+    </div>
+  </section>
+
+  <section class="section" style="margin-top: 1.25rem;">
+    <div class="section-heading">
+      <p class="eyebrow">Ready for your next booking?</p>
+      <h2>Choose your next service</h2>
+    </div>
+
+    <div class="grid grid-3">
+      <article class="card service-card customer-service-card">
+        <span class="customer-service-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 20h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M7 20l1-10h8l1 10" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M9 10V6a3 3 0 0 1 6 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <h3>Car Wash</h3>
+        <p>Quick exterior cleaning for a fresh shine.</p>
+        <a class="text-link customer-service-cta" href="/booking?service=Car%20Wash">Book Car Wash</a>
+      </article>
+
+      <article class="card service-card customer-service-card">
+        <span class="customer-service-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12a8 8 0 1 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 12l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M8 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <h3>Full Valet</h3>
+        <p>Interior and exterior detailing.</p>
+        <a class="text-link customer-service-cta" href="/booking?service=Full%20Valet">Book Full Valet</a>
+      </article>
+
+      <article class="card service-card customer-service-card">
+        <span class="customer-service-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 7h10v14H7V7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M9 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M9 13h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <h3>Overnight Parking</h3>
+        <p>Safe monitored overnight parking.</p>
+        <a class="text-link customer-service-cta" href="/booking?service=Overnight%20Parking">Reserve a Spot</a>
+      </article>
+    </div>
+  </section>
+{% endblock %}

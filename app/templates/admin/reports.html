@@ -5,9 +5,9 @@
 {% block admin_main %}
 <header class="admin-main-header admin-main-header--compact">
   <div>
-    <p class="eyebrow">Admin</p>
+    <p class="eyebrow">Analytics</p>
     <h1>Reports</h1>
-    <p class="muted">Operational and financial reporting.</p>
+    <p class="muted">Live summaries from bookings and payments.</p>
   </div>
 
   <div class="admin-main-user">
@@ -23,10 +23,122 @@
   </div>
 </header>
 
-<section class="section admin-page-section">
+<section class="dashboard-metrics dashboard-metrics--reports" aria-label="Headline KPIs">
+  <article class="card stat-card">
+    <span>Total bookings</span>
+    <strong>{{ reports_metrics.total_bookings }}</strong>
+  </article>
+  <article class="card stat-card stat-card--teal">
+    <span>Paid bookings</span>
+    <strong>{{ reports_metrics.paid_bookings }}</strong>
+  </article>
+  <article class="card stat-card">
+    <span>Unpaid bookings</span>
+    <strong>{{ reports_metrics.unpaid_bookings }}</strong>
+  </article>
+  <article class="card stat-card stat-card--accent">
+    <span>Revenue (est.)</span>
+    <strong>R{{ reports_metrics.total_revenue_display }}</strong>
+    <span class="stat-card-hint">Paid booking totals</span>
+  </article>
+  <article class="card stat-card">
+    <span>Return rate</span>
+    <strong>{{ return_rate_pct }}%</strong>
+    {% if return_rate_customers > 0 %}
+      <span class="stat-card-hint">{{ return_rate_returning }} / {{ return_rate_customers }} with repeat bookings</span>
+    {% else %}
+      <span class="stat-card-hint">No repeat data yet</span>
+    {% endif %}
+  </article>
+  <article class="card stat-card">
+    <span>Top service</span>
+    <strong class="admin-reports-top-svc">{{ top_service }}</strong>
+    <span class="stat-card-hint">{{ top_service_count }} bookings</span>
+  </article>
+</section>
+
+<section class="admin-reports-grid section admin-page-section">
   <article class="card">
-    <h2>Coming soon</h2>
-    <p class="muted">Reporting views for bookings and payments will be available in a later phase.</p>
+    <h2>Revenue by service</h2>
+    <p class="muted small-muted">Paid bookings only (estimated price).</p>
+    {% if revenue_by_service %}
+      <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+          <thead><tr><th>Service</th><th>Revenue</th></tr></thead>
+          <tbody>
+            {% for r in revenue_by_service %}
+              <tr>
+                <td>{{ r.service }}</td>
+                <td><strong>R{{ r.amount_display }}</strong></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">No paid revenue by service.</p>
+    {% endif %}
+  </article>
+  <article class="card">
+    <h2>Bookings by service</h2>
+    {% if bookings_by_service %}
+      <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+          <thead><tr><th>Service</th><th>Bookings</th></tr></thead>
+          <tbody>
+            {% for r in bookings_by_service %}
+              <tr>
+                <td>{{ r.service }}</td>
+                <td><strong>{{ r.count }}</strong></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">No bookings yet.</p>
+    {% endif %}
+  </article>
+  <article class="card">
+    <h2>Top customers (bookings)</h2>
+    {% if top_customers_by_bookings %}
+      <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+          <thead><tr><th>Customer</th><th>Bookings</th></tr></thead>
+          <tbody>
+            {% for r in top_customers_by_bookings %}
+              <tr>
+                <td>{{ r.name }}</td>
+                <td><strong>{{ r.count }}</strong></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">No linked customer bookings.</p>
+    {% endif %}
+  </article>
+  <article class="card">
+    <h2>Top customers (spend)</h2>
+    <p class="muted small-muted">Paid payments per customer.</p>
+    {% if top_customers_by_spend %}
+      <div class="dashboard-table-wrap">
+        <table class="dashboard-table">
+          <thead><tr><th>Customer</th><th>Total spend</th></tr></thead>
+          <tbody>
+            {% for r in top_customers_by_spend %}
+              <tr>
+                <td>{{ r.name }}</td>
+                <td><strong>R{{ r.spend_display }}</strong></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">No paid customer payments.</p>
+    {% endif %}
   </article>
 </section>
 {% endblock %}

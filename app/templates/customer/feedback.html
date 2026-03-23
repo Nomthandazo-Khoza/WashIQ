@@ -1,0 +1,85 @@
+{% extends "customer/layout.html" %}
+{% block title %}Feedback | WashIQ{% endblock %}
+{% block meta_description %}Rate your WashIQ experience and share feedback.{% endblock %}
+
+{% block customer_main %}
+  <section class="card customer-hero feedback-hero">
+    <p class="eyebrow">Your voice</p>
+    <h1 class="customer-hero-title">Rate your experience</h1>
+    <p class="muted">
+      Tell us how we did — your feedback helps us improve washes, parking, and booking for everyone in Durban.
+    </p>
+  </section>
+
+  <div class="feedback-page-grid section">
+    <article class="card feedback-form-card">
+      <h2 class="feedback-section-title">Submit feedback</h2>
+      <p class="muted feedback-section-lead">
+        Rating is required. Comments are optional (up to 2&nbsp;000 characters). You can link feedback to a past booking if you like.
+      </p>
+
+      {% if feedback_submitted %}
+        <p class="alert success feedback-banner" role="status">Thank you — your feedback has been saved.</p>
+      {% endif %}
+      {% if form_error %}
+        <p class="alert error feedback-banner" role="alert">{{ form_error }}</p>
+      {% endif %}
+
+      <form class="booking-form feedback-form" method="post" action="/feedback">
+        <fieldset class="feedback-rating-fieldset">
+          <legend class="feedback-rating-legend">Rating <span class="req" aria-hidden="true">*</span></legend>
+          <p class="muted feedback-rating-hint" id="rating-hint">1 = poor, 5 = excellent</p>
+          <div class="rating-options" role="radiogroup" aria-describedby="rating-hint">
+            {% for n in range(1, 6) %}
+              <label class="rating-pill{% if form_rating == n %} is-selected{% endif %}">
+                <input type="radio" name="rating" value="{{ n }}"{% if form_rating == n %} checked{% endif %}>
+                <span class="rating-pill-label">{{ n }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+
+        <label for="feedback-booking">Link to a booking <span class="muted">(optional)</span></label>
+        <select id="feedback-booking" name="booking_id">
+          <option value=""{% if not form_booking_id %} selected{% endif %}>General feedback — not tied to one booking</option>
+          {% for b in booking_options %}
+            <option value="{{ b.id }}"{% if form_booking_id == b.id|string %} selected{% endif %}>{{ b.label }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="feedback-comment">Comment <span class="muted">(optional)</span></label>
+        <textarea id="feedback-comment" name="comment" rows="5" maxlength="2000" placeholder="What went well? What could be better?">{{ form_comment }}</textarea>
+
+        <button class="btn feedback-submit-btn" type="submit">Submit feedback</button>
+      </form>
+    </article>
+
+    <article class="card feedback-history-card">
+      <h2 class="feedback-section-title">Your past feedback</h2>
+      {% if my_feedback %}
+        <ul class="feedback-history-list">
+          {% for item in my_feedback %}
+            <li class="feedback-history-item">
+              <div class="feedback-history-head">
+                <div class="testimonial-stars feedback-history-stars" aria-label="{{ item.rating }} out of 5">
+                  {% for i in range(1, 6) %}
+                    <span class="star{% if i <= item.rating %} is-on{% endif %}" aria-hidden="true">★</span>
+                  {% endfor %}
+                </div>
+                <span class="muted feedback-history-date">{{ item.date_label }}</span>
+              </div>
+              <p class="feedback-history-booking muted">{{ item.booking_label }}</p>
+              {% if item.comment %}
+                <p class="feedback-history-comment">“{{ item.comment }}”</p>
+              {% else %}
+                <p class="muted feedback-history-comment feedback-history-comment--empty">Rating only — no written comment.</p>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted feedback-empty">You haven’t submitted feedback yet. Use the form to share your first review.</p>
+      {% endif %}
+    </article>
+  </div>
+{% endblock %}

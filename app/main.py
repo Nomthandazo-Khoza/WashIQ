@@ -12,8 +12,10 @@ from sqlalchemy import text
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.database import Base, engine
+from app.models import AppSettings, CommunicationLog, Feedback, Promotion  # noqa: F401 — register metadata for create_all
 from app.routes.auth import router as auth_router
 from app.routes.booking import router as booking_router
+from app.routes.customer import router as customer_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.home import router as home_router
 from app.routes.payment import router as payment_router
@@ -59,6 +61,7 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.include_router(home_router)
 app.include_router(booking_router)
 app.include_router(auth_router)
+app.include_router(customer_router)
 app.include_router(payment_router)
 app.include_router(dashboard_router)
 
@@ -94,11 +97,27 @@ def startup():
                     "estimated_price",
                     "ALTER TABLE bookings ADD COLUMN estimated_price FLOAT DEFAULT 0",
                 ),
+                (
+                    "collection_status",
+                    "ALTER TABLE bookings ADD COLUMN collection_status VARCHAR(40) NOT NULL DEFAULT 'not_applicable'",
+                ),
+                (
+                    "collected_at",
+                    "ALTER TABLE bookings ADD COLUMN collected_at DATETIME",
+                ),
             ]
             for col_name, ddl in booking_patches:
                 if col_name not in booking_column_names:
                     connection.execute(text(ddl))
                     booking_column_names.add(col_name)
+
+        payment_columns = connection.execute(text("PRAGMA table_info(payments)")).fetchall()
+        if payment_columns:
+            payment_column_names = {column[1] for column in payment_columns}
+            if "customer_id" not in payment_column_names:
+                connection.execute(
+                    text("ALTER TABLE payments ADD COLUMN customer_id INTEGER REFERENCES customers(id)")
+                )
 
     # Hard-coded admin seed for development/testing.
     # This makes admin login work immediately without manually updating SQLite.
@@ -129,5 +148,13 @@ def startup():
             )
             db.add(admin)
         db.commit()
+    finally:
+        db.close()
+
+    db = SessionLocal()
+    try:
+        from app.settings_helpers import get_or_create_app_settings
+
+        get_or_create_app_settings(db)
     finally:
         db.close()

@@ -1,0 +1,24 @@
+{% extends "customer/layout.html" %}
+{% block title %}Profile | WashIQ{% endblock %}
+{% block meta_description %}Your WashIQ account details.{% endblock %}
+
+{% block customer_main %}
+  <section class="customer-page-header card">
+    <p class="eyebrow">Account</p>
+    <h1>Profile</h1>
+    <p class="muted">Your contact details on file with WashIQ.</p>
+  </section>
+
+  <section class="card" style="margin-top: 1rem;">
+    <h2 style="margin-top: 0;">Customer details</h2>
+    <div class="summary-list">
+      <div><span>Full Name</span><strong>{{ current_customer.full_name }}</strong></div>
+      <div><span>Email</span><strong>{{ current_customer.email }}</strong></div>
+      <div><span>Phone</span><strong>{{ current_customer.phone }}</strong></div>
+    </div>
+    <div class="hero-actions" style="margin-top: 1.25rem;">
+      <a class="btn" href="/booking">Book a Service</a>
+      <a class="btn btn-ghost" href="/my-bookings">My Bookings</a>
+    </div>
+  </section>
+{% endblock %}

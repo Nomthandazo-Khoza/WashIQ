@@ -1,0 +1,92 @@
+{% extends "admin/layout.html" %}
+{% block title %}Communications log | WashIQ Admin{% endblock %}
+{% block meta_description %}WashIQ email and SMS communication log.{% endblock %}
+
+{% block admin_main %}
+<header class="admin-main-header admin-main-header--compact">
+  <div>
+    <p class="eyebrow">Operations</p>
+    <h1>Communications log</h1>
+    <p class="muted">Booking confirmations and payment notices (sent, simulated, or failed).</p>
+  </div>
+  <div class="admin-main-user">
+    {% if current_customer %}
+      <div class="muted small-muted">Signed in as <strong>{{ current_customer.full_name }}</strong></div>
+    {% endif %}
+    <form method="post" action="/logout" class="logout-form">
+      <button class="btn btn-ghost btn-sm" type="submit">Logout</button>
+    </form>
+  </div>
+</header>
+
+<section class="dashboard-metrics dashboard-metrics--communications" aria-label="Communication totals">
+  <article class="card stat-card">
+    <span>Total messages</span>
+    <strong>{{ communication_metrics.total }}</strong>
+  </article>
+  <article class="card stat-card stat-card--teal">
+    <span>Sent</span>
+    <strong>{{ communication_metrics.sent }}</strong>
+  </article>
+  <article class="card stat-card stat-card--accent">
+    <span>Simulated</span>
+    <strong>{{ communication_metrics.simulated }}</strong>
+    <span class="stat-card-hint">Dev / no provider</span>
+  </article>
+  <article class="card stat-card">
+    <span>Failed</span>
+    <strong>{{ communication_metrics.failed }}</strong>
+  </article>
+</section>
+
+<section class="section admin-page-section">
+<article class="card admin-communications-card">
+  <h2>Recent log</h2>
+  <p class="muted small-muted">Newest first.</p>
+  {% if communication_rows %}
+    <div class="dashboard-table-wrap communications-table-wrap">
+      <table class="dashboard-table communications-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>When</th>
+            <th>Channel</th>
+            <th>Type</th>
+            <th>Recipient</th>
+            <th>Subject</th>
+            <th>Status</th>
+            <th>Preview</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in communication_rows %}
+            <tr>
+              <td>{{ row.id }}</td>
+              <td class="small-muted">{{ row.created_at_display }}</td>
+              <td><span class="comm-channel comm-channel--{{ row.channel }}">{{ row.channel }}</span></td>
+              <td class="small-muted">{{ row.message_type }}</td>
+              <td>{{ row.recipient }}</td>
+              <td class="small-muted communications-subject-cell" title="{{ row.subject }}">{{ row.subject }}</td>
+              <td>
+                {% if row.status == 'sent' %}
+                  <span class="status-badge paid">{{ row.status }}</span>
+                {% elif row.status == 'simulated' %}
+                  <span class="status-badge pending">{{ row.status }}</span>
+                {% else %}
+                  <span class="status-badge unpaid">{{ row.status }}</span>
+                {% endif %}
+              </td>
+              <td class="small-muted comm-preview-cell" title="{{ row.subject }}">{{ row.body_preview }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="admin-empty-card">
+      <p class="muted">No messages logged yet. They appear when customers complete bookings or payments.</p>
+    </div>
+  {% endif %}
+</article>
+</section>
+{% endblock %}

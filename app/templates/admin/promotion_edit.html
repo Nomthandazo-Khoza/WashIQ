@@ -1,0 +1,73 @@
+{% extends "admin/layout.html" %}
+{% block title %}Edit promotion | WashIQ Admin{% endblock %}
+{% block meta_description %}Edit a WashIQ homepage promotion.{% endblock %}
+
+{% block admin_main %}
+<header class="admin-main-header admin-main-header--compact">
+  <div>
+    <p class="eyebrow">Marketing</p>
+    <h1>Edit promotion</h1>
+    <p class="muted"><a class="action-link" href="/dashboard/promotions">&larr; Back to all promotions</a></p>
+  </div>
+
+  <div class="admin-main-user">
+    {% if current_customer %}
+      <div class="muted small-muted">
+        Signed in as <strong>{{ current_customer.full_name }}</strong>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/logout" class="logout-form">
+      <button class="btn btn-ghost btn-sm" type="submit">Logout</button>
+    </form>
+  </div>
+</header>
+
+{% if promo_form_error %}
+  <p class="alert error promotions-flash" role="alert">{{ promo_form_error }}</p>
+{% endif %}
+
+<section class="section admin-page-section">
+  <article class="card admin-promo-form-card admin-promo-edit-card">
+    <h2>Promotion #{{ edit_promotion_id }}</h2>
+    <p class="muted small-muted">Changes apply immediately after save. Homepage picks the newest eligible promotion.</p>
+    <form class="booking-form admin-promo-form" method="post" action="/dashboard/promotions/{{ edit_promotion_id }}/edit">
+      <label for="edit-promo-title">Title</label>
+      <input id="edit-promo-title" name="title" type="text" maxlength="200" required value="{{ form_title }}">
+
+      <label for="edit-promo-description">Description</label>
+      <textarea id="edit-promo-description" name="description" rows="4" required>{{ form_description }}</textarea>
+
+      <label for="edit-promo-badge">Badge <span class="muted">(optional)</span></label>
+      <input id="edit-promo-badge" name="badge_text" type="text" maxlength="80" value="{{ form_badge_text }}" placeholder="Weekend special">
+
+      <label for="edit-promo-cta-text">CTA button text <span class="muted">(optional)</span></label>
+      <input id="edit-promo-cta-text" name="cta_text" type="text" maxlength="120" value="{{ form_cta_text }}" placeholder="Book now">
+
+      <label for="edit-promo-cta-link">CTA link <span class="muted">(optional)</span></label>
+      <input id="edit-promo-cta-link" name="cta_link" type="text" maxlength="500" value="{{ form_cta_link }}" placeholder="/booking or https://…">
+
+      <div class="admin-promo-dates">
+        <div>
+          <label for="edit-promo-start">Start date</label>
+          <input id="edit-promo-start" name="start_date" type="date" value="{{ form_start_date }}">
+        </div>
+        <div>
+          <label for="edit-promo-end">End date</label>
+          <input id="edit-promo-end" name="end_date" type="date" value="{{ form_end_date }}">
+        </div>
+      </div>
+
+      <label class="admin-checkbox-row">
+        <input type="checkbox" name="active" value="1"{% if form_active_checked %} checked{% endif %}>
+        <span>Active</span>
+      </label>
+
+      <div class="admin-promo-edit-actions">
+        <button class="btn" type="submit">Save changes</button>
+        <a class="btn btn-ghost" href="/dashboard/promotions">Cancel</a>
+      </div>
+    </form>
+  </article>
+</section>
+{% endblock %}
