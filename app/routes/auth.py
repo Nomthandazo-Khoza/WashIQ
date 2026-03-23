@@ -35,14 +35,20 @@ def _signup_context(request: Request, db: Session, **kwargs):
 
 
 def _login_context(request: Request, db: Session, **kwargs):
-    base = {
+    context = {
         "request": request,
         "error_message": None,
         "form_data": {"email": ""},
     }
-    base.update(auth_template_context(request, db))
-    base.update(kwargs)
-    return base
+    extra = auth_template_context(request, db)
+    if not isinstance(extra, dict):
+        extra = dict(extra)
+    context.update(extra)
+
+    if not isinstance(kwargs, dict):
+        kwargs = dict(kwargs)
+    context.update(kwargs)
+    return context
 
 
 @router.get("/signup")
