@@ -197,6 +197,7 @@ def login_page(request: Request, next: str | None = None, db: Session = Depends(
     if not isinstance(context, dict):
         context = dict(context)
     return templates.TemplateResponse(
+        request,
         "login.html",
         context,
     )
@@ -244,6 +245,7 @@ def login(
             if not isinstance(context, dict):
                 context = dict(context)
             return templates.TemplateResponse(
+                request,
                 "login.html",
                 context,
             )
@@ -286,6 +288,7 @@ def login(
             if not isinstance(context, dict):
                 context = dict(context)
             return templates.TemplateResponse(
+                request,
                 "login.html",
                 context,
             )
