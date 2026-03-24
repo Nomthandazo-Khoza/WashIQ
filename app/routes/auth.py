@@ -29,8 +29,19 @@ def _signup_context(request: Request, db: Session, **kwargs):
         "error_message": None,
         "form_data": {"full_name": "", "phone": "", "email": ""},
     }
-    base.update(auth_template_context(request, db))
-    base.update(kwargs)
+
+    extra = auth_template_context(request, db)
+
+    if isinstance(extra, dict):
+        base.update(extra)
+    elif isinstance(extra, (list, tuple)):
+        for item in extra:
+            if isinstance(item, dict):
+                base.update(item)
+
+    if isinstance(kwargs, dict):
+        base.update(kwargs)
+
     return base
 
 
@@ -40,14 +51,22 @@ def _login_context(request: Request, db: Session, **kwargs):
         "error_message": None,
         "form_data": {"email": ""},
     }
-    extra = auth_template_context(request, db)
-    if not isinstance(extra, dict):
-        extra = dict(extra)
-    context.update(extra)
 
-    if not isinstance(kwargs, dict):
-        kwargs = dict(kwargs)
-    context.update(kwargs)
+    # Safely merge auth context
+    extra = auth_template_context(request, db)
+
+    if isinstance(extra, dict):
+        context.update(extra)
+    elif isinstance(extra, (list, tuple)):
+        # Try to extract dict safely
+        for item in extra:
+            if isinstance(item, dict):
+                context.update(item)
+
+    # Safely merge kwargs
+    if isinstance(kwargs, dict):
+        context.update(kwargs)
+
     return context
 
 
