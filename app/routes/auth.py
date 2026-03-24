@@ -193,9 +193,12 @@ def login_page(request: Request, next: str | None = None, db: Session = Depends(
     next_path = next or None
     if next_path and not next_path.startswith("/"):
         next_path = None
+    context = _login_context(request, db, next_path=next_path)
+    if not isinstance(context, dict):
+        context = dict(context)
     return templates.TemplateResponse(
         "login.html",
-        _login_context(request, db, next_path=next_path),
+        context,
     )
 
 
@@ -231,15 +234,18 @@ def login(
             next_path = effective_next or None
             if next_path and not next_path.startswith("/"):
                 next_path = None
+            context = _login_context(
+                request,
+                db,
+                form_data=form_data,
+                error_message="Invalid email or password.",
+                next_path=next_path,
+            )
+            if not isinstance(context, dict):
+                context = dict(context)
             return templates.TemplateResponse(
                 "login.html",
-                _login_context(
-                    request,
-                    db,
-                    form_data=form_data,
-                    error_message="Invalid email or password.",
-                    next_path=next_path,
-                ),
+                context,
             )
 
         # If the DB row predates `is_admin` fixes, the seeded admin email may still be non-admin.
@@ -270,15 +276,18 @@ def login(
             next_path = effective_next or None
             if next_path and not next_path.startswith("/"):
                 next_path = None
+            context = _login_context(
+                request,
+                db,
+                form_data=form_data,
+                error_message="We couldn't log you in right now. Please try again.",
+                next_path=next_path,
+            )
+            if not isinstance(context, dict):
+                context = dict(context)
             return templates.TemplateResponse(
                 "login.html",
-                _login_context(
-                    request,
-                    db,
-                    form_data=form_data,
-                    error_message="We couldn't log you in right now. Please try again.",
-                    next_path=next_path,
-                ),
+                context,
             )
         except Exception:
             return PlainTextResponse(
