@@ -19,8 +19,8 @@ from app.models import Customer
 
 router = APIRouter()
 
-TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+BASE_DIR = Path(__file__).resolve().parent.parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
 def _signup_context(request: Request, db: Session, **kwargs):

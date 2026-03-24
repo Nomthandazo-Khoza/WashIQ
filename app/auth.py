@@ -78,20 +78,19 @@ def customer_template_view(customer: Customer) -> dict:
     }
 
 
-def auth_template_context(request: Request, db: Session) -> dict:
-    current_customer = get_current_customer(request, db)
-    if current_customer is None:
-        return {
-            "current_customer": None,
-            "is_authenticated": False,
-            "is_admin": False,
-        }
-    view = customer_template_view(current_customer)
-    return {
-        "current_customer": view,
-        "is_authenticated": True,
-        "is_admin": bool(view["is_admin"]),
+def auth_template_context(request, db):
+    try:
+        customer = get_current_customer(request, db)
+    except Exception:
+        customer = None
+
+    context = {
+        "current_customer": customer,
+        "is_authenticated": bool(customer),
+        "is_admin": is_admin_customer(customer) if customer else False,
     }
+
+    return context
 
 
 def is_admin_customer(customer: Customer | None) -> bool:
