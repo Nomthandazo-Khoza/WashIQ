@@ -2126,6 +2126,11 @@ html {
   gap: 0.55rem;
 }
 
+/* Hide duplicate header logout; keep nav/sidebar logout actions */
+.admin-main-user .logout-form {
+  display: none;
+}
+
 /* Slightly tighten existing dashboard layout with sidebar */
 .admin-main .dashboard-metrics {
   margin-top: 0.3rem;
