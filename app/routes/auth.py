@@ -72,7 +72,7 @@ def _login_context(request: Request, db: Session, **kwargs):
 
 @router.get("/signup")
 def signup_page(request: Request, db: Session = Depends(get_db)):
-    return templates.TemplateResponse("signup.html", _signup_context(request, db))
+    return templates.TemplateResponse(request, "signup.html", _signup_context(request, db))
 
 
 @router.post("/signup")
@@ -103,6 +103,7 @@ def signup(
             ]
         ):
             return templates.TemplateResponse(
+                request,
                 "signup.html",
                 _signup_context(
                     request,
@@ -114,6 +115,7 @@ def signup(
 
         if "@" not in form_data["email"] or "." not in form_data["email"]:
             return templates.TemplateResponse(
+                request,
                 "signup.html",
                 _signup_context(
                     request,
@@ -125,6 +127,7 @@ def signup(
 
         if password != confirm_password:
             return templates.TemplateResponse(
+                request,
                 "signup.html",
                 _signup_context(
                     request,
@@ -139,6 +142,7 @@ def signup(
         )
         if existing_customer:
             return templates.TemplateResponse(
+                request,
                 "signup.html",
                 _signup_context(
                     request,
@@ -167,6 +171,7 @@ def signup(
     except Exception:
         try:
             return templates.TemplateResponse(
+                request,
                 "signup.html",
                 _signup_context(
                     request,
